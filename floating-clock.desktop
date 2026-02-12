@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=DT Clock
+Comment=Floating translucent analog desktop clock
+Exec=/usr/bin/python3 /home/your-user/DT_Clock/floating_clock.py --size 220 --opacity 0.45 --on-top
+Terminal=false
+Hidden=false
+NoDisplay=false
+Icon=clock
+X-GNOME-Autostart-enabled=true
+Categories=Utility;
