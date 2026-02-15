@@ -1,0 +1,21 @@
+{
+  "name": "dt_clock",
+  "version": "1.0.0",
+  "description": "Floating analog desktop clock for CachyOS/Linux using PyQt5.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PyrateGFXProductions/DT_Clock.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/PyrateGFXProductions/DT_Clock/issues"
+  },
+  "homepage": "https://github.com/PyrateGFXProductions/DT_Clock#readme"
+}
