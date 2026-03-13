@@ -1,12 +1,24 @@
 [Desktop Entry]
+# TEMPLATE ONLY (do not commit your personal paths).
+#
+# Recommended:
+#   python3 /path/to/DT_Clock/floating_clock.py --install-menu-entry
+#   python3 /path/to/DT_Clock/floating_clock.py --install-autostart
+#
+# This template exists for reference. The script writes launchers to:
+#   ~/.local/share/applications/dt-clock.desktop
+#   ~/.config/autostart/dt-clock.desktop
+
 Type=Application
 Version=1.0
 Name=DT Clock
 Comment=Floating translucent analog desktop clock
-Exec=/usr/bin/python3 /home/your-user/DT_Clock/floating_clock.py --size 220 --opacity 0.45 --on-top
+Exec=/usr/bin/python3 /path/to/DT_Clock/floating_clock.py
+Path=/path/to/DT_Clock
 Terminal=false
 Hidden=false
 NoDisplay=false
 Icon=clock
+StartupNotify=false
 X-GNOME-Autostart-enabled=true
 Categories=Utility;

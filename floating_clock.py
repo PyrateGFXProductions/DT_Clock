@@ -330,7 +330,12 @@ def build_launch_command(
     stopwatch: bool = False,
     include_settings: bool = False, # Changed default to False
 ) -> list[str]:
-    python_path = str(Path(sys.executable).resolve()) if sys.executable else "/usr/bin/python3"
+    # Important: avoid resolving symlinks here.
+    # `Path(sys.executable).resolve()` can turn a venv python into a system python,
+    # and can also bake in versioned interpreter paths (e.g. /usr/bin/python3.14)
+    # that break on future upgrades. Using `sys.executable` preserves what the
+    # user actually launched with.
+    python_path = sys.executable or "/usr/bin/python3"
     command = [python_path, str(Path(__file__).resolve())]
     
     if not include_settings:
