@@ -7,6 +7,7 @@ import argparse
 import json
 import math
 import os
+import signal
 import shutil
 import subprocess
 import sys
@@ -55,6 +56,70 @@ def _log(msg: str):
     except Exception:
         pass
     print(f">>> {msg}")
+
+def _pid_is_running(pid: int) -> bool:
+    """Best-effort PID existence check.
+
+    Note: `os.kill(pid, 0)` returns success if the PID exists and we can signal it.
+    For processes we don't own, it may raise `PermissionError` even though the PID exists.
+    """
+    if pid <= 0:
+        return False
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return True
+
+
+def _read_proc_cmdline(pid: int) -> str | None:
+    """Reads `/proc/<pid>/cmdline` if available (Linux), else returns None."""
+    proc_cmdline = Path("/proc") / str(pid) / "cmdline"
+    try:
+        raw = proc_cmdline.read_bytes()
+    except OSError:
+        return None
+    parts = [p.decode(errors="ignore") for p in raw.split(b"\0") if p]
+    return " ".join(parts)
+
+
+def _pid_looks_like_dt_clock(pid: int) -> bool:
+    """Heuristic: confirm the PID is a python process running this script.
+
+    This avoids false positives when a stale lock PID gets reused by an unrelated process
+    after a reboot or a crash.
+    """
+    cmdline = _read_proc_cmdline(pid)
+    if not cmdline:
+        return False
+    script_name = Path(__file__).name
+    script_path = str(Path(__file__).resolve())
+    return (script_name in cmdline) or (script_path in cmdline)
+
+
+def _try_terminate_dt_clock_pid(pid: int, timeout_s: float = 2.0) -> None:
+    """Attempt to terminate a running DT Clock instance (only if we can verify it)."""
+    if not _pid_is_running(pid):
+        return
+    if not _pid_looks_like_dt_clock(pid):
+        return
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except OSError:
+        return
+    deadline = time.monotonic() + max(0.0, timeout_s)
+    while time.monotonic() < deadline:
+        if not _pid_is_running(pid):
+            return
+        time.sleep(0.05)
+    try:
+        os.kill(pid, signal.SIGKILL)
+    except OSError:
+        return
 
 MODE_ANALOG = "analog"
 MODE_DIGITAL = "digital"
@@ -1778,8 +1843,23 @@ def main() -> int:
     
     if getattr(args, "reset", False):
         _log("EMERGENCY RESET INITIATED")
+        lock_file = STATE_DIR / "instance.lock"
+        if lock_file.exists():
+            try:
+                old_pid = int(lock_file.read_text(encoding="utf-8").strip())
+            except (OSError, ValueError):
+                old_pid = None
+            if old_pid is not None:
+                _try_terminate_dt_clock_pid(old_pid)
+            try:
+                lock_file.unlink()
+            except OSError:
+                pass
         if STATE_FILE.exists():
-            STATE_FILE.unlink()
+            try:
+                STATE_FILE.unlink()
+            except OSError:
+                pass
         print("Reset complete. Saved state deleted. Relaunching in 1s...")
         time.sleep(1)
         # Note: We don't pkill here to avoid suicide before return, 
@@ -1894,68 +1974,79 @@ def main() -> int:
     if lock_file.exists():
         try:
             old_pid = int(lock_file.read_text().strip())
-            os.kill(old_pid, 0) # Check if process exists
-            print(f"!!! Clock is already running (PID {old_pid}). Exiting.")
-            return 0
+            if _pid_is_running(old_pid) and _pid_looks_like_dt_clock(old_pid):
+                print(f"!!! Clock is already running (PID {old_pid}). Exiting.")
+                return 0
+            # If the PID exists but isn't our clock, it's a stale lock (PID reuse is common).
+            if _pid_is_running(old_pid) and not _pid_looks_like_dt_clock(old_pid):
+                _log(f"LOCK: PID {old_pid} exists but does not look like DT Clock. Overriding stale lock.")
         except (OSError, ValueError):
             pass # Stale lock
-    lock_file.write_text(str(os.getpid()))
-
-    app = QApplication([])
-    app.setDesktopFileName(APP_ID)
-    app.setApplicationName(APP_NAME)
-
-    clock = FloatingAnalogClock(
-        size=launch_size,
-        face_alpha=launch_opacity,
-        show_seconds=launch_show_seconds,
-        layer=launch_layer,
-        mode=launch_mode,
-        stopwatch_active=launch_stopwatch,
-        color_theme=launch_theme,
-        readout_font=launch_font,
-        initial_x=int(saved_state.get("x", 0)),
-        initial_y=int(saved_state.get("y", 0)),
-    )
-    
-    _log("Clock instance created with initial geometry.")
-    
-    # Restore stopwatch time and status
-    clock.stopwatch_elapsed_ms = initial_stopwatch_elapsed
-    if initial_stopwatch_running and launch_stopwatch:
-        clock.toggle_stopwatch_running()
-    
-    # Crucial: Apply flags, apply size, Move, then Show.
-    clock._set_window_flags(launch_layer)
-    clock._apply_window_size()
-    clock.show()
-    
-    # HEAVY-DUTY WAYLAND DELAYED PLACEMENT
-    def delayed_restore():
-        # Wayland ignores the first few move() attempts while surface maps.
-        # We hit it with a sequence of increasing delays.
-        clock.restore_position(getattr(args, "x", None), getattr(args, "y", None), saved_state)
-        # Final layering re-assertion via system rules
-        if _is_kde_session() and is_kwin_rule_enabled():
-            clock.set_layer(launch_layer, persist=False, force=True)
-
-    # Multi-tap restoration to ensure Wayland compositor registers the position
-    QTimer.singleShot(500, delayed_restore)
-    QTimer.singleShot(1200, delayed_restore)
-    QTimer.singleShot(2500, delayed_restore)
-    
-    # Definitive initialization lock: 10 seconds for Wayland stabilization
-    QTimer.singleShot(10000, lambda: setattr(clock, 'fully_initialized', True))
-    _log("Startup sequence complete. 10s initialization lock active.")
+    my_pid = os.getpid()
+    wrote_lock = False
+    try:
+        lock_file.write_text(str(my_pid), encoding="utf-8")
+        wrote_lock = True
+    except OSError:
+        _log("LOCK: Failed to write lock file. Continuing without single-instance protection.")
 
     try:
-        exit_code = app.exec_()
+        app = QApplication([])
+        app.setDesktopFileName(APP_ID)
+        app.setApplicationName(APP_NAME)
+
+        clock = FloatingAnalogClock(
+            size=launch_size,
+            face_alpha=launch_opacity,
+            show_seconds=launch_show_seconds,
+            layer=launch_layer,
+            mode=launch_mode,
+            stopwatch_active=launch_stopwatch,
+            color_theme=launch_theme,
+            readout_font=launch_font,
+            initial_x=int(saved_state.get("x", 0)),
+            initial_y=int(saved_state.get("y", 0)),
+        )
+    
+        _log("Clock instance created with initial geometry.")
+    
+        # Restore stopwatch time and status
+        clock.stopwatch_elapsed_ms = initial_stopwatch_elapsed
+        if initial_stopwatch_running and launch_stopwatch:
+            clock.toggle_stopwatch_running()
+    
+        # Crucial: Apply flags, apply size, Move, then Show.
+        clock._set_window_flags(launch_layer)
+        clock._apply_window_size()
+        clock.show()
+    
+        # HEAVY-DUTY WAYLAND DELAYED PLACEMENT
+        def delayed_restore():
+            # Wayland ignores the first few move() attempts while surface maps.
+            # We hit it with a sequence of increasing delays.
+            clock.restore_position(getattr(args, "x", None), getattr(args, "y", None), saved_state)
+            # Final layering re-assertion via system rules
+            if _is_kde_session() and is_kwin_rule_enabled():
+                clock.set_layer(launch_layer, persist=False, force=True)
+
+        # Multi-tap restoration to ensure Wayland compositor registers the position
+        QTimer.singleShot(500, delayed_restore)
+        QTimer.singleShot(1200, delayed_restore)
+        QTimer.singleShot(2500, delayed_restore)
+    
+        # Definitive initialization lock: 10 seconds for Wayland stabilization
+        QTimer.singleShot(10000, lambda: setattr(clock, 'fully_initialized', True))
+        _log("Startup sequence complete. 10s initialization lock active.")
+
+        return app.exec_()
     finally:
-        try:
-            lock_file.unlink()
-        except OSError:
-            pass
-    return exit_code
+        # Only remove the lock if we own it.
+        if wrote_lock:
+            try:
+                if lock_file.exists() and lock_file.read_text(encoding="utf-8").strip() == str(my_pid):
+                    lock_file.unlink()
+            except OSError:
+                pass
 
 
 if __name__ == "__main__":
