@@ -6,6 +6,8 @@
 
 DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS/Arch/KDE)** and **Windows**. It combines a classic analog aesthetic with modern features like transparency, window layering, and a built-in precision stopwatch.
 
+![DT Clock Demo](images/demo.mp4)
+
 ---
 
 ## ✨ Key Features
