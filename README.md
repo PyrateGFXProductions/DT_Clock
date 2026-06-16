@@ -1,5 +1,7 @@
 # DT Clock 🕰️
 
+[![Support on Ko-fi](https://img.shields.io/badge/Support-Ko--fi-F16061?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/pyrategfxproductions)
+
 **A sleek, customizable, and minimalist floating analog clock for your desktop.**
 
 DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS/Arch/KDE)** and **Windows**. It combines a classic analog aesthetic with modern features like transparency, window layering, and a built-in precision stopwatch.
@@ -86,6 +88,14 @@ Binaries are excluded from this repository to keep the source control lean. If y
 ```bash
 pyinstaller --onefile --windowed --name "DT Clock" --clean floating_clock.py
 ```
+
+---
+
+## ☕ Support the Project
+
+If you find DT Clock useful and would like to support its development, consider buying me a coffee! Your support helps keep the project alive and free for everyone.
+
+[![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-Buy%20Me%20a%20Coffee-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/pyrategfxproductions)
 
 ---
 
