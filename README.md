@@ -77,7 +77,7 @@ python3 floating_clock.py --on-bottom # Act as wallpaper/below windows
 ## 📦 Releases & Binaries
 
 **Note for Users:** You do not need to install Python or compile code to use DT Clock.
-1. Navigate to the **[Releases](https://github.com/YourUsername/DT_Clock/releases)** section on GitHub.
+1. Navigate to the **[Releases](https://github.com/PyrateGFXProductions/DT_Clock/releases)** section on GitHub.
 2. Download the latest `DT_Clock.exe` (Windows) or the appropriate Linux binary.
 3. Simply run the file to start the clock!
 
