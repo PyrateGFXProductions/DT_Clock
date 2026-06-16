@@ -1237,6 +1237,20 @@ class FloatingAnalogClock(QWidget):
 
         prefs_menu = menu.addMenu("Preferences")
 
+        theme_menu = prefs_menu.addMenu("Themes")
+        theme_group = QActionGroup(theme_menu)
+        theme_group.setExclusive(True)
+        for theme_key in THEME_ORDER:
+            theme_data = THEME_PRESETS[theme_key]
+            theme_action = QAction(theme_data["label"], self)
+            theme_action.setCheckable(True)
+            theme_action.setChecked(self.color_theme == theme_key)
+            theme_action.triggered.connect(
+                lambda _checked=False, key=theme_key: self.set_color_theme(key)
+            )
+            theme_group.addAction(theme_action)
+            theme_menu.addAction(theme_action)
+
         size_menu = prefs_menu.addMenu("Clock size")
         size_down_action = QAction("Smaller", self)
         size_down_action.triggered.connect(lambda: self.set_clock_size(self.clock_size - 20))
