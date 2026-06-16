@@ -31,7 +31,7 @@ DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS
 ## 🚀 Installation & Setup
 
 ### For Windows Users
-The easiest way to use DT Clock on Windows is to download the latest executable from the [Releases](https://github.com/YourUsername/DT_Clock/releases) page.
+The easiest way to use DT Clock on Windows is to download the latest executable from the [Releases](https://github.com/PyrateGFXProductions/DT_Clock/releases) page.
 
 **To run from source:**
 1. Ensure you have [Python 3](https://www.python.org/downloads/) installed.
