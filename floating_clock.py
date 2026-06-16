@@ -78,6 +78,8 @@ def _pid_is_running(pid: int) -> bool:
 
 def _read_proc_cmdline(pid: int) -> str | None:
     """Reads `/proc/<pid>/cmdline` if available (Linux), else returns None."""
+    if sys.platform != "linux":
+        return None
     proc_cmdline = Path("/proc") / str(pid) / "cmdline"
     try:
         raw = proc_cmdline.read_bytes()
@@ -93,6 +95,19 @@ def _pid_looks_like_dt_clock(pid: int) -> bool:
     This avoids false positives when a stale lock PID gets reused by an unrelated process
     after a reboot or a crash.
     """
+    if sys.platform != "linux":
+        # On Windows, we check if the process is still alive.
+        # If running as a PyInstaller binary, the executable name should match.
+        try:
+            import subprocess
+            output = subprocess.check_output(
+                ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV"], 
+                text=True, stderr=subprocess.STDOUT
+            )
+            return str(pid) in output
+        except Exception:
+            return _pid_is_running(pid)
+
     cmdline = _read_proc_cmdline(pid)
     if not cmdline:
         return False
@@ -108,7 +123,13 @@ def _try_terminate_dt_clock_pid(pid: int, timeout_s: float = 2.0) -> None:
     if not _pid_looks_like_dt_clock(pid):
         return
     try:
-        os.kill(pid, signal.SIGTERM)
+        if sys.platform == "win32":
+            # On Windows, SIGTERM is an alias for terminate, which is basically SIGKILL.
+            # But we can try to be polite if it were a real console app.
+            import signal
+            os.kill(pid, signal.CTRL_C_EVENT if hasattr(signal, "CTRL_C_EVENT") else 15)
+        else:
+            os.kill(pid, signal.SIGTERM)
     except OSError:
         return
     deadline = time.monotonic() + max(0.0, timeout_s)
@@ -117,7 +138,11 @@ def _try_terminate_dt_clock_pid(pid: int, timeout_s: float = 2.0) -> None:
             return
         time.sleep(0.05)
     try:
-        os.kill(pid, signal.SIGKILL)
+        if sys.platform == "win32":
+            # Force kill on Windows
+            subprocess.run(["taskkill", "/F", "/PID", str(pid)], capture_output=True)
+        else:
+            os.kill(pid, signal.SIGKILL)
     except OSError:
         return
 
@@ -617,6 +642,19 @@ def remove_kwin_keep_above_rule() -> tuple[bool, str]:
 
 
 def handle_install_flags(args: argparse.Namespace, launch_command: list[str]) -> int | None:
+    if sys.platform == "win32":
+        # Check if any install/uninstall flags were requested
+        linux_only_flags = [
+            "install_menu_entry", "uninstall_menu_entry",
+            "install_autostart", "uninstall_autostart",
+            "install_kwin_rule", "uninstall_kwin_rule"
+        ]
+        for flag in linux_only_flags:
+            if getattr(args, flag, False):
+                print(f"Error: --{flag.replace('_', '-')} is only supported on Linux.")
+                return 1
+        return None
+
     requested = False
     success = True
 
@@ -714,6 +752,8 @@ class FloatingAnalogClock(QWidget):
         self.fully_initialized = False
         
         self.setAttribute(Qt.WA_TranslucentBackground, True)
+        if sys.platform == "win32":
+            self.setAttribute(Qt.WA_NoSystemBackground, True)
         self.setObjectName(APP_ID)
         self.setWindowTitle(APP_NAME)
         
@@ -731,15 +771,16 @@ class FloatingAnalogClock(QWidget):
         self.setWindowTitle(APP_NAME)
 
         self.timer = QTimer(self)
-        self.timer.timeout.connect(self.update)
+        self.timer.timeout.connect(self._handle_timer_timeout)
         self._update_refresh_timer()
 
-        # Add drop shadow for depth
-        self.shadow = QGraphicsDropShadowEffect(self)
-        self.shadow.setBlurRadius(25)
-        self.shadow.setColor(QColor(0, 0, 0, 160))
-        self.shadow.setOffset(0, 4)
-        self.setGraphicsEffect(self.shadow)
+        # Add drop shadow for depth (Linux only, causes freezes on Windows)
+        if sys.platform != "win32":
+            self.shadow = QGraphicsDropShadowEffect(self)
+            self.shadow.setBlurRadius(25)
+            self.shadow.setColor(QColor(0, 0, 0, 160))
+            self.shadow.setOffset(0, 4)
+            self.setGraphicsEffect(self.shadow)
 
         self.animation = QPropertyAnimation(self, b"geometry")
         self.animation.setDuration(450)
@@ -762,7 +803,8 @@ class FloatingAnalogClock(QWidget):
         flags |= Qt.Tool
         
         # X11BypassWindowManagerHint is ONLY safe on X11. It breaks mapping on Wayland.
-        if os.environ.get("XDG_SESSION_TYPE") != "wayland":
+        # It also breaks event loops and transparency on Windows.
+        if sys.platform == "linux" and os.environ.get("XDG_SESSION_TYPE") != "wayland":
             flags |= Qt.X11BypassWindowManagerHint
         
         if layer == LAYER_TOP:
@@ -809,11 +851,22 @@ class FloatingAnalogClock(QWidget):
         # Position is now only saved on drag-release or manual save.
         pass
 
+    def _handle_timer_timeout(self) -> None:
+        """Periodic update called by the refresh timer."""
+        _log("Timer heartbeat")
+        if sys.platform == "win32":
+            # On Windows, update() can be ignored by DWM for frameless/translucent windows.
+            # repaint() forces an immediate synchronous paint event.
+            self.repaint()
+        else:
+            self.update()
+
     def _update_refresh_timer(self) -> None:
         if self.stopwatch_active:
             interval_ms = 10 if self.stopwatch_running else 33
         else:
             interval_ms = 1000
+        _log(f"Timer started with interval {interval_ms}ms")
         self.timer.start(interval_ms)
 
     def _runtime_launch_command(self, include_settings: bool = False) -> list[str]:
@@ -1256,51 +1309,52 @@ class FloatingAnalogClock(QWidget):
         center_action.triggered.connect(lambda: (self.center_on_screen(), self.save_state(manual=True)))
         sys_menu.addAction(center_action)
         
-        sys_menu.addSeparator()
-        
-        apps_action = QAction("Show in apps menu", self)
-        apps_action.setCheckable(True)
-        apps_action.setChecked(MENU_ENTRY_FILE.exists())
-        apps_action.triggered.connect(
-            lambda checked, action=apps_action: self._toggle_entry(
-                action, checked, MENU_ENTRY_FILE, autostart=False
+        if sys.platform != "win32":
+            sys_menu.addSeparator()
+            
+            apps_action = QAction("Show in apps menu", self)
+            apps_action.setCheckable(True)
+            apps_action.setChecked(MENU_ENTRY_FILE.exists())
+            apps_action.triggered.connect(
+                lambda checked, action=apps_action: self._toggle_entry(
+                    action, checked, MENU_ENTRY_FILE, autostart=False
+                )
             )
-        )
-        sys_menu.addAction(apps_action)
+            sys_menu.addAction(apps_action)
 
-        autostart_action = QAction("Start at login", self)
-        autostart_action.setCheckable(True)
-        autostart_action.setChecked(AUTOSTART_FILE.exists())
-        autostart_action.triggered.connect(
-            lambda checked, action=autostart_action: self._toggle_entry(
-                action, checked, AUTOSTART_FILE, autostart=True
+            autostart_action = QAction("Start at login", self)
+            autostart_action.setCheckable(True)
+            autostart_action.setChecked(AUTOSTART_FILE.exists())
+            autostart_action.triggered.connect(
+                lambda checked, action=autostart_action: self._toggle_entry(
+                    action, checked, AUTOSTART_FILE, autostart=True
+                )
             )
-        )
-        sys_menu.addAction(autostart_action)
-        
-        sys_menu.addSeparator()
-        
-        kwin_menu = sys_menu.addMenu("KWin helper")
-        kwin_available = _is_kde_session() and _resolve_kwin_tools() is not None
+            sys_menu.addAction(autostart_action)
+            
+            sys_menu.addSeparator()
+            
+            kwin_menu = sys_menu.addMenu("KWin helper")
+            kwin_available = _is_kde_session() and _resolve_kwin_tools() is not None
 
-        kwin_hint_action = QAction("Fix Layer/Persistence via KDE Rule", self)
-        kwin_hint_action.setCheckable(True)
-        enabled = is_kwin_rule_enabled()
-        kwin_hint_action.setChecked(enabled)
-        kwin_hint_action.triggered.connect(
-            lambda checked, action=kwin_hint_action: self._toggle_kwin_rule(action, checked)
-        )
-        sys_menu.addAction(kwin_hint_action)
+            kwin_hint_action = QAction("Fix Layer/Persistence via KDE Rule", self)
+            kwin_hint_action.setCheckable(True)
+            enabled = is_kwin_rule_enabled()
+            kwin_hint_action.setChecked(enabled)
+            kwin_hint_action.triggered.connect(
+                lambda checked, action=kwin_hint_action: self._toggle_kwin_rule(action, checked)
+            )
+            sys_menu.addAction(kwin_hint_action)
 
-        reload_kwin_action = QAction("Reload KWin rules", self)
-        reload_kwin_action.setEnabled(kwin_available)
-        reload_kwin_action.triggered.connect(self._reload_kwin_rules_with_feedback)
-        kwin_menu.addAction(reload_kwin_action)
+            reload_kwin_action = QAction("Reload KWin rules", self)
+            reload_kwin_action.setEnabled(kwin_available)
+            reload_kwin_action.triggered.connect(self._reload_kwin_rules_with_feedback)
+            kwin_menu.addAction(reload_kwin_action)
 
-        if not kwin_available:
-            kwin_hint_action = QAction("Unavailable outside KDE/KWin", self)
-            kwin_hint_action.setEnabled(False)
-            kwin_menu.addAction(kwin_hint_action)
+            if not kwin_available:
+                kwin_hint_action = QAction("Unavailable outside KDE/KWin", self)
+                kwin_hint_action.setEnabled(False)
+                kwin_menu.addAction(kwin_hint_action)
 
         quit_action = QAction("Quit", self)
         quit_action.triggered.connect(QApplication.instance().quit)
@@ -1381,6 +1435,7 @@ class FloatingAnalogClock(QWidget):
         event.accept()
 
     def paintEvent(self, _event) -> None:  # noqa: N802 (Qt signature)
+        # _log("paintEvent triggered")
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         palette = THEME_PRESETS[_valid_theme(self.color_theme)]
@@ -1843,6 +1898,16 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> int:
+    # Enable High DPI scaling for modern Windows displays
+    if sys.platform == "win32":
+        try:
+            from PyQt5.QtCore import Qt
+            from PyQt5.QtWidgets import QApplication
+            QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+            QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+        except ImportError:
+            pass
+
     args = parse_args()
     _log(f"Main entry. CMD: {' '.join(sys.argv)}")
     
@@ -1976,24 +2041,28 @@ def main() -> int:
 
     # SINGLE INSTANCE LOCK
     lock_file = STATE_DIR / "instance.lock"
-    if lock_file.exists():
-        try:
-            old_pid = int(lock_file.read_text().strip())
-            if _pid_is_running(old_pid) and _pid_looks_like_dt_clock(old_pid):
-                print(f"!!! Clock is already running (PID {old_pid}). Exiting.")
-                return 0
-            # If the PID exists but isn't our clock, it's a stale lock (PID reuse is common).
-            if _pid_is_running(old_pid) and not _pid_looks_like_dt_clock(old_pid):
-                _log(f"LOCK: PID {old_pid} exists but does not look like DT Clock. Overriding stale lock.")
-        except (OSError, ValueError):
-            pass # Stale lock
-    my_pid = os.getpid()
     wrote_lock = False
-    try:
-        lock_file.write_text(str(my_pid), encoding="utf-8")
-        wrote_lock = True
-    except OSError:
-        _log("LOCK: Failed to write lock file. Continuing without single-instance protection.")
+    my_pid = os.getpid()
+
+    if sys.platform != "win32":
+        if lock_file.exists():
+            try:
+                old_pid = int(lock_file.read_text().strip())
+                if _pid_is_running(old_pid) and _pid_looks_like_dt_clock(old_pid):
+                    print(f"!!! Clock is already running (PID {old_pid}). Exiting.")
+                    return 0
+                # If the PID exists but isn't our clock, it's a stale lock (PID reuse is common).
+                if _pid_is_running(old_pid) and not _pid_looks_like_dt_clock(old_pid):
+                    _log(f"LOCK: PID {old_pid} exists but does not look like DT Clock. Overriding stale lock.")
+            except (OSError, ValueError):
+                pass # Stale lock
+        try:
+            lock_file.write_text(str(my_pid), encoding="utf-8")
+            wrote_lock = True
+        except OSError:
+            _log("LOCK: Failed to write lock file. Continuing without single-instance protection.")
+    else:
+        _log("LOCK: Skipping instance lock on Windows for debug.")
 
     try:
         app = QApplication([])

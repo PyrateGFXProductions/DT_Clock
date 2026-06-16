@@ -1,145 +1,97 @@
-# DT Clock
+# DT Clock 🕰️
 
-Floating analog desktop clock for CachyOS/Linux using PyQt5.
+**A sleek, customizable, and minimalist floating analog clock for your desktop.**
 
-## Features
+DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS/Arch/KDE)** and **Windows**. It combines a classic analog aesthetic with modern features like transparency, window layering, and a built-in precision stopwatch.
 
-- Frameless, translucent analog clock
-- Drag to move anywhere
-- Built-in stopwatch mode with face click start/stop
-- Millisecond digital readout below the face in stopwatch mode
-- Readout font selection from installed monospaced fonts
-- In-app clock size controls for different screen resolutions
-- Window layer controls (`Always on top`, `Normal`, `Below windows`)
-- Optional KDE/KWin keep-above rule helper
-- Multiple color themes for light/dark/high-contrast desktops
-- Right-click menu with `Preferences`
-- Toggle `Show in apps menu` from the clock itself
-- Toggle `Start at login` from the clock itself
-- Remembers last position
-- Optional seconds hand
-- `--on-top`, `--normal-layer`, or `--on-bottom` window hint
+---
 
-## Install
+## ✨ Key Features
 
-On Arch/CachyOS:
+- **🖼️ Frameless & Translucent:** A clean, minimalist design that blends into any desktop wallpaper.
+- **🖱️ Fully Interactive:** Drag to position anywhere; right-click for a comprehensive preferences menu.
+- **⏱️ Integrated Stopwatch:**
+  - Start/stop with a simple click on the clock face.
+  - High-precision millisecond digital readout.
+  - Custom font selection for the digital display.
+- **🎨 Visual Customization:**
+  - **Themes:** Choose from Midnight, Daylight, High Contrast, and Ocean.
+  - **Sizing:** Real-time scaling to fit your screen resolution.
+  - **Second Hand:** Optional toggle for a cleaner look.
+- **🪟 Window Management:**
+  - **Layer Control:** Set to "Always on Top," "Normal," or "Below Windows."
+  - **KDE Integration:** Specialized KWin rule helper for Linux users to ensure consistent "Keep Above" behavior.
+- **⚙️ Desktop Integration:**
+  - **Autostart:** Toggle "Start at login" directly from the app.
+  - **App Menu:** Automatically creates/removes desktop launcher entries.
+  - **State Persistence:** Remembers your position, size, and theme across restarts.
+
+---
+
+## 🚀 Installation & Setup
+
+### For Windows Users
+The easiest way to use DT Clock on Windows is to download the latest executable from the [Releases](https://github.com/YourUsername/DT_Clock/releases) page.
+
+**To run from source:**
+1. Ensure you have [Python 3](https://www.python.org/downloads/) installed.
+2. Install dependencies:
+   ```bash
+   pip install PyQt5
+   ```
+3. Launch the app:
+   ```bash
+   python floating_clock.py
+   ```
+
+### For Linux Users (Arch/CachyOS)
+1. Install PyQt5:
+   ```bash
+   sudo pacman -S python-pyqt5
+   ```
+2. Launch the app:
+   ```bash
+   python3 floating_clock.py
+   ```
+
+---
+
+## 🛠️ Advanced Usage (Command Line)
+
+You can launch DT Clock with specific parameters to bypass saved settings:
 
 ```bash
-sudo pacman -S python-pyqt5
-```
+# Set specific size and opacity
+python3 floating_clock.py --size 300 --opacity 0.8
 
-## Run
-
-From this project directory:
-
-```bash
-python3 floating_clock.py
-```
-
-Useful options:
-
-```bash
-python3 floating_clock.py --size 260 --opacity 0.35
-python3 floating_clock.py --hide-seconds
-python3 floating_clock.py --on-bottom
-python3 floating_clock.py --normal-layer
-python3 floating_clock.py --install-kwin-rule
-python3 floating_clock.py --mode stopwatch
-python3 floating_clock.py --theme daylight
+# Launch directly in stopwatch mode with a custom font
 python3 floating_clock.py --mode stopwatch --readout-font "JetBrains Mono"
-python3 floating_clock.py --x 120 --y 80
+
+# Force window layer behavior
+python3 floating_clock.py --on-top    # Always stay on top
+python3 floating_clock.py --on-bottom # Act as wallpaper/below windows
 ```
 
-## Stopwatch Mode
+---
 
-1. Right-click clock -> `Mode` -> `Stopwatch`
-2. Left-click the clock face to start or stop timing
-3. Right-click -> `Reset stopwatch` to clear elapsed time
+## 📦 Releases & Binaries
 
-The stopwatch readout shows millisecond precision and appears below the clock face.
+**Note for Users:** You do not need to install Python or compile code to use DT Clock.
+1. Navigate to the **[Releases](https://github.com/YourUsername/DT_Clock/releases)** section on GitHub.
+2. Download the latest `DT_Clock.exe` (Windows) or the appropriate Linux binary.
+3. Simply run the file to start the clock!
 
-## App Menu Launcher
-
-Install a user-level launcher so the clock appears in your desktop app menu:
-
+**Note for Developers:** 
+Binaries are excluded from this repository to keep the source control lean. If you wish to build your own binary, you can use PyInstaller:
 ```bash
-python3 floating_clock.py --install-menu-entry
+pyinstaller --onefile --windowed --name "DT Clock" --clean floating_clock.py
 ```
 
-Remove it:
+---
 
-```bash
-python3 floating_clock.py --uninstall-menu-entry
-```
+## 📄 License
 
-The launcher is written to:
+This project is open-source. Feel free to fork, modify, and share!
 
-```text
-~/.local/share/applications/dt-clock.desktop
-```
-
-Keep the project in a permanent location before installing menu/autostart entries, because the launcher stores the absolute path to `floating_clock.py`.
-
-## Autostart
-
-Enable autostart:
-
-```bash
-python3 floating_clock.py --install-autostart
-```
-
-Disable autostart:
-
-```bash
-python3 floating_clock.py --uninstall-autostart
-```
-
-The autostart entry is written to:
-
-```text
-~/.config/autostart/dt-clock.desktop
-```
-
-## KDE/KWin Helper
-
-For KDE Plasma users, install a KWin rule that reinforces keep-above behavior:
-
-```bash
-python3 floating_clock.py --install-kwin-rule
-```
-
-Remove it:
-
-```bash
-python3 floating_clock.py --uninstall-kwin-rule
-```
-
-This helper updates:
-
-```text
-~/.config/kwinrulesrc
-```
-
-## In-App Preferences
-
-While the clock is running, right-click it:
-
-- `Mode` -> `Clock` or `Stopwatch`
-- `Preferences` -> `Window layer` (`Always on top`, `Normal`, `Below windows`)
-- `Preferences` -> `KWin helper` (`Enable keep-above rule`, `Reload KWin rules`)
-- `Preferences` -> `Clock size` (`Smaller`, `Larger`, plus presets)
-- `Preferences` -> `Color theme` (`Midnight`, `Daylight`, `High Contrast`, `Ocean`)
-- `Preferences` -> `Show in apps menu`
-- `Preferences` -> `Start at login`
-- `Preferences` -> `Readout font`
-
-The readout font menu is populated from fonts installed on your system, so changes should apply immediately.
-
-`Center on screen` centers the widget on the monitor where the clock currently is (or the cursor monitor if needed).
-
-## Wayland Note
-
-- On X11, position/drag behavior is usually unrestricted.
-- On Wayland, compositor rules may limit exact placement and some window-layer hints (`--on-top` / `--on-bottom`) may be ignored.
-- On KDE/Wayland, enabling `Preferences -> KWin helper -> Enable keep-above rule` usually improves consistency.
-- This script attempts a compositor-native move request first (`startSystemMove`) for better Wayland behavior.
+---
+*Developed with ❤️ for the desktop customization community.*
