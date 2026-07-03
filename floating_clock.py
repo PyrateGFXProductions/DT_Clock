@@ -232,8 +232,62 @@ THEME_PRESETS = {
         "readout_text": (225, 255, 247, 250),
         "glass_highlight": (255, 255, 255, 50),
     },
+    "rolex": {
+        "label": "Rolex",
+        "face_fill": [(26, 80, 26, 240), (18, 55, 18, 255)],
+        "face_border": (212, 175, 55, 200),
+        "major_tick": (212, 175, 55, 230),
+        "minor_tick": (180, 155, 60, 140),
+        "text_primary": (212, 175, 55, 220),
+        "text_secondary": (180, 160, 100, 190),
+        "hand_primary": (212, 175, 55, 240),
+        "hand_secondary": (200, 190, 170, 220),
+        "hand_accent": (255, 60, 60, 240),
+        "center_dot": (212, 175, 55, 250),
+        "readout_bg": (20, 60, 20, 180),
+        "readout_border": (212, 175, 55, 130),
+        "readout_label": (212, 175, 55, 200),
+        "readout_text": (255, 215, 0, 250),
+        "glass_highlight": (255, 255, 200, 50),
+    },
+    "casio": {
+        "label": "Casio",
+        "face_fill": [(35, 35, 42, 255), (20, 20, 28, 255)],
+        "face_border": (100, 110, 130, 200),
+        "major_tick": (180, 200, 230, 230),
+        "minor_tick": (120, 135, 155, 150),
+        "text_primary": (200, 220, 245, 230),
+        "text_secondary": (150, 170, 195, 200),
+        "hand_primary": (200, 220, 245, 240),
+        "hand_secondary": (100, 200, 255, 220),
+        "hand_accent": (255, 100, 100, 240),
+        "center_dot": (200, 220, 245, 250),
+        "readout_bg": (10, 14, 20, 200),
+        "readout_border": (80, 100, 130, 150),
+        "readout_label": (150, 200, 245, 200),
+        "readout_text": (100, 220, 255, 250),
+        "glass_highlight": (200, 220, 255, 30),
+    },
+    "citizen": {
+        "label": "Citizen",
+        "face_fill": [(22, 42, 72, 240), (14, 28, 55, 255)],
+        "face_border": (180, 200, 225, 180),
+        "major_tick": (220, 235, 252, 230),
+        "minor_tick": (160, 185, 210, 145),
+        "text_primary": (220, 235, 252, 220),
+        "text_secondary": (180, 205, 225, 190),
+        "hand_primary": (200, 225, 248, 240),
+        "hand_secondary": (160, 200, 235, 220),
+        "hand_accent": (80, 200, 255, 240),
+        "center_dot": (200, 225, 252, 235),
+        "readout_bg": (10, 26, 48, 180),
+        "readout_border": (150, 190, 225, 130),
+        "readout_label": (180, 210, 245, 210),
+        "readout_text": (220, 240, 255, 250),
+        "glass_highlight": (200, 220, 255, 45),
+    },
 }
-THEME_ORDER = ["midnight", "daylight", "high_contrast", "ocean"]
+THEME_ORDER = ["midnight", "daylight", "high_contrast", "ocean", "rolex", "casio", "citizen"]
 DEFAULT_THEME = "midnight"
 
 PREFERRED_READOUT_FONTS = [
@@ -750,6 +804,7 @@ class FloatingAnalogClock(QWidget):
         self.drag_started = False
         self.click_threshold_px = 15 # Increased for high-DPI reliability
         self.fully_initialized = False
+        self._stopwatch_icon_click_pos = None
         
         self.setAttribute(Qt.WA_TranslucentBackground, True)
         if sys.platform == "win32":
@@ -1165,6 +1220,85 @@ class FloatingAnalogClock(QWidget):
             "Could not reload KWin rules automatically. Log out/in if needed.",
         )
 
+    def _open_settings_menu(self, pos: QPoint) -> None:
+        menu = QMenu(self)
+
+        theme_menu = menu.addMenu("Theme")
+        theme_group = QActionGroup(theme_menu)
+        theme_group.setExclusive(True)
+        for theme_key in THEME_ORDER:
+            theme_data = THEME_PRESETS[theme_key]
+            theme_action = QAction(theme_data["label"], self)
+            theme_action.setCheckable(True)
+            theme_action.setChecked(self.color_theme == theme_key)
+            theme_action.triggered.connect(
+                lambda _checked=False, key=theme_key: self.set_color_theme(key)
+            )
+            theme_group.addAction(theme_action)
+            theme_menu.addAction(theme_action)
+
+        menu.addSeparator()
+
+        mode_group = QActionGroup(menu)
+        mode_group.setExclusive(True)
+
+        analog_action = QAction("Analog", self)
+        analog_action.setCheckable(True)
+        analog_action.setChecked(self.mode == MODE_ANALOG)
+        analog_action.triggered.connect(lambda _checked=False: self.set_mode(MODE_ANALOG))
+        mode_group.addAction(analog_action)
+        menu.addAction(analog_action)
+
+        digital_action = QAction("Digital", self)
+        digital_action.setCheckable(True)
+        digital_action.setChecked(self.mode == MODE_DIGITAL)
+        digital_action.triggered.connect(lambda _checked=False: self.set_mode(MODE_DIGITAL))
+        mode_group.addAction(digital_action)
+        menu.addAction(digital_action)
+
+        menu.addSeparator()
+
+        size_menu = menu.addMenu("Size")
+        size_down = QAction("Smaller (−20)", self)
+        size_down.triggered.connect(lambda: self.set_clock_size(self.clock_size - 20))
+        size_down.setEnabled(self.clock_size > MIN_CLOCK_SIZE)
+        size_menu.addAction(size_down)
+        size_up = QAction("Larger (+20)", self)
+        size_up.triggered.connect(lambda: self.set_clock_size(self.clock_size + 20))
+        size_up.setEnabled(self.clock_size < MAX_CLOCK_SIZE)
+        size_menu.addAction(size_up)
+        size_menu.addSeparator()
+        for label, sz in [("Small 160", 160), ("Medium 220", 220), ("Large 300", 300), ("XL 380", 380)]:
+            sa = QAction(label, self)
+            sa.setCheckable(True)
+            sa.setChecked(abs(self.clock_size - sz) <= 8)
+            sa.triggered.connect(lambda _checked=False, v=sz: self.set_clock_size(v))
+            size_menu.addAction(sa)
+
+        layer_menu = menu.addMenu("Layer")
+        layer_group = QActionGroup(layer_menu)
+        layer_group.setExclusive(True)
+        for lbl, lv in [("Always on top", LAYER_TOP), ("Normal", LAYER_NORMAL), ("Below windows", LAYER_BOTTOM)]:
+            la = QAction(lbl, self)
+            la.setCheckable(True)
+            la.setChecked(self.layer == lv)
+            la.triggered.connect(lambda _checked=False, v=lv: self.set_layer(v))
+            layer_group.addAction(la)
+            layer_menu.addAction(la)
+
+        opacity_menu = menu.addMenu("Opacity")
+        opacity_group = QActionGroup(opacity_menu)
+        opacity_group.setExclusive(True)
+        for lbl, av in [("Ghost 15%", 0.15), ("Translucent 40%", 0.40), ("Modern 65%", 0.65), ("Bold 85%", 0.85), ("Opaque 100%", 1.0)]:
+            oa = QAction(lbl, self)
+            oa.setCheckable(True)
+            oa.setChecked(abs(self.face_alpha - av) < 0.05)
+            oa.triggered.connect(lambda _checked=False, v=av: self.set_face_alpha(v))
+            opacity_group.addAction(oa)
+            opacity_menu.addAction(oa)
+
+        menu.exec_(pos)
+
     def _current_stopwatch_ms(self) -> int:
         if not self.stopwatch_running:
             return self.stopwatch_elapsed_ms
@@ -1393,6 +1527,16 @@ class FloatingAnalogClock(QWidget):
         if event.button() != Qt.LeftButton:
             return
 
+        icon_name = self._is_icon_click(event.pos())
+        if icon_name == 'settings':
+            self._open_settings_menu(event.globalPos())
+            event.accept()
+            return
+        elif icon_name == 'stopwatch':
+            self._stopwatch_icon_click_pos = event.globalPos()
+            event.accept()
+            return
+
         self.drag_offset = event.globalPos() - self.frameGeometry().topLeft()
         self.press_global_pos = event.globalPos()
         self.drag_started = False
@@ -1428,6 +1572,19 @@ class FloatingAnalogClock(QWidget):
     def mouseReleaseEvent(self, event) -> None:  # noqa: N802 (Qt signature)
         if event.button() != Qt.LeftButton:
             return
+
+        # Handle stopwatch icon click
+        if self._stopwatch_icon_click_pos is not None:
+            distance = (event.globalPos() - self._stopwatch_icon_click_pos).manhattanLength()
+            if distance <= self.click_threshold_px:
+                self.toggle_stopwatch()
+                self._stopwatch_icon_click_pos = None
+                self.drag_offset = None
+                self.press_global_pos = None
+                self.drag_started = False
+                event.accept()
+                return
+            self._stopwatch_icon_click_pos = None
 
         was_click = False
         if self.press_global_pos is not None:
@@ -1519,6 +1676,35 @@ class FloatingAnalogClock(QWidget):
             painter.setBrush(_qcolor(palette["center_dot"]))
             painter.drawEllipse(center, radius * 0.04, radius * 0.04)
 
+        # Day/Date window centered between 12 and centerline (analog only)
+        if self.mode == MODE_ANALOG and not self.stopwatch_active:
+            self._draw_day_date(painter, center, radius, palette)
+
+        # Settings gear icon
+        icon_size_draw = max(11, radius * 0.12)
+        if self.mode == MODE_DIGITAL:
+            dd_center = QPointF(icon_size_draw + 16, self.height() - icon_size_draw - 12)
+        else:
+            settings_angle = math.radians(135)
+            dd_center = QPointF(
+                center.x() + radius * 0.28 * math.cos(settings_angle),
+                center.y() + radius * 0.28 * math.sin(settings_angle),
+            )
+        gear_color = _qcolor(palette["hand_secondary"])
+        self._draw_gear_icon(painter, dd_center, icon_size_draw, gear_color)
+
+        # Stopwatch icon
+        if self.mode == MODE_DIGITAL:
+            sw_center = QPointF(self.width() - icon_size_draw - 16, self.height() - icon_size_draw - 12)
+        else:
+            stopwatch_angle = math.radians(45)
+            sw_center = QPointF(
+                center.x() + radius * 0.28 * math.cos(stopwatch_angle),
+                center.y() + radius * 0.28 * math.sin(stopwatch_angle),
+            )
+        sw_color = _qcolor(palette["hand_accent"]) if self.stopwatch_active else _qcolor(palette["hand_primary"])
+        self._draw_stopwatch_icon(painter, sw_center, icon_size_draw, sw_color)
+
         painter.end()
 
     def _format_digital_time(self) -> str:
@@ -1607,6 +1793,8 @@ class FloatingAnalogClock(QWidget):
         painter.setPen(_qcolor(palette["text_primary"]))
         painter.setFont(QFont("Noto Sans", max(8, self.clock_size // 20)))
         for hour in range(1, 13):
+            if hour == 3:
+                continue
             angle = math.radians(hour * 30 - 90)
             text_radius = radius - 38
             x = center.x() + text_radius * math.cos(angle)
@@ -1754,6 +1942,144 @@ class FloatingAnalogClock(QWidget):
         if hours > 0:
             return f"{hours:02}:{minutes:02}:{seconds:02}.{millis:03}"
         return f"{minutes:02}:{seconds:02}.{millis:03}"
+
+    @staticmethod
+    def _get_day_date_text() -> tuple[str, str]:
+        now = datetime.now()
+        day_abbr = now.strftime("%a").upper()
+        date_str = str(now.day)
+        return day_abbr, date_str
+
+    def _get_icon_regions(self, center: QPointF, radius: float) -> dict:
+        """Returns dict of icon name -> QRectF for clickable areas on the clock face."""
+        if self.mode == MODE_DIGITAL:
+            icon_size = max(10, radius * 0.10)
+            face_bounds = QRectF(6, 6, self.width() - 12, self.height() - 12)
+            regions = {
+                'settings': QRectF(
+                    face_bounds.left() + 8,
+                    face_bounds.bottom() - icon_size * 2 - 6,
+                    icon_size * 2, icon_size * 2
+                ),
+                'stopwatch': QRectF(
+                    face_bounds.right() - icon_size * 2 - 8,
+                    face_bounds.bottom() - icon_size * 2 - 6,
+                    icon_size * 2, icon_size * 2
+                ),
+            }
+            return regions
+
+        icon_size = max(11, radius * 0.12)
+
+        settings_angle = math.radians(135)
+        settings_pos = QPointF(
+            center.x() + radius * 0.28 * math.cos(settings_angle),
+            center.y() + radius * 0.28 * math.sin(settings_angle),
+        )
+
+        stopwatch_angle = math.radians(45)
+        stopwatch_pos = QPointF(
+            center.x() + radius * 0.28 * math.cos(stopwatch_angle),
+            center.y() + radius * 0.28 * math.sin(stopwatch_angle),
+        )
+
+        regions = {
+            'settings': QRectF(
+                settings_pos.x() - icon_size, settings_pos.y() - icon_size,
+                icon_size * 2, icon_size * 2
+            ),
+            'stopwatch': QRectF(
+                stopwatch_pos.x() - icon_size, stopwatch_pos.y() - icon_size,
+                icon_size * 2, icon_size * 2
+            ),
+        }
+        return regions
+
+    def _draw_day_date(self, painter: QPainter, center: QPointF, radius: float, palette: dict) -> None:
+        day_abbr, date_str = self._get_day_date_text()
+
+        win_width = radius * 0.34
+        win_height = radius * 0.24
+        win_x = center.x() - win_width / 2
+        win_y = center.y() - radius * 0.32 - win_height / 2
+        win_rect = QRectF(win_x, win_y, win_width, win_height)
+
+        painter.setPen(QPen(_qcolor(palette["face_border"], 0.7), 1.0))
+        painter.setBrush(_qcolor(palette["readout_bg"]))
+        painter.drawRoundedRect(win_rect, 4, 4)
+
+        label_font_size = max(8, radius * 0.075)
+        label_font = QFont("Noto Sans", int(label_font_size))
+        label_font.setBold(True)
+        painter.setFont(label_font)
+
+        day_rect = QRectF(win_rect.left(), win_rect.top() + 2, win_rect.width(), win_rect.height() * 0.44)
+        painter.setPen(_qcolor(palette["text_secondary"]))
+        painter.drawText(day_rect, Qt.AlignCenter, day_abbr)
+
+        date_font_size = max(10, radius * 0.090)
+        date_font = QFont("Noto Sans", int(date_font_size))
+        date_font.setBold(True)
+        painter.setFont(date_font)
+        painter.setPen(_qcolor(palette["text_primary"]))
+        date_rect = QRectF(win_rect.left(), win_rect.top() + win_rect.height() * 0.44, win_rect.width(), win_rect.height() * 0.56)
+        painter.drawText(date_rect, Qt.AlignCenter, date_str)
+
+    def _draw_gear_icon(self, painter: QPainter, center: QPointF, size: float, color: QColor) -> None:
+        painter.setPen(QPen(color, 1.5))
+        painter.setBrush(Qt.NoBrush)
+        painter.drawEllipse(center, size, size)
+
+        inner = size * 0.55
+        painter.setPen(QPen(color, 1.0))
+        painter.drawEllipse(center, inner, inner)
+
+        painter.setBrush(color)
+        painter.drawEllipse(center, size * 0.2, size * 0.2)
+
+        teeth_count = 8
+        for i in range(teeth_count):
+            angle = math.radians(i * 45)
+            outer_pt = QPointF(
+                center.x() + (size + 2) * math.cos(angle),
+                center.y() + (size + 2) * math.sin(angle),
+            )
+            inner_pt = QPointF(
+                center.x() + (size - 2) * math.cos(angle),
+                center.y() + (size - 2) * math.sin(angle),
+            )
+            painter.setPen(QPen(color, 2.0))
+            painter.drawLine(inner_pt, outer_pt)
+
+    def _draw_stopwatch_icon(self, painter: QPainter, center: QPointF, size: float, color: QColor) -> None:
+        painter.setPen(QPen(color, 1.5))
+        painter.setBrush(Qt.NoBrush)
+        painter.drawEllipse(center, size, size)
+
+        triangle = [
+            QPointF(center.x() - size * 0.3, center.y() - size * 0.4),
+            QPointF(center.x() - size * 0.3, center.y() + size * 0.4),
+            QPointF(center.x() + size * 0.45, center.y()),
+        ]
+        painter.setBrush(color)
+        painter.setPen(Qt.NoPen)
+        painter.drawPolygon(triangle)
+
+    def _is_icon_click(self, pos: QPoint) -> str | None:
+        if self.mode == MODE_DIGITAL:
+            center = QPointF(self.width() / 2, self.height() / 2)
+            radius = min(self.width() - 12, self.height() - 12) / 2
+        else:
+            face_bounds = QRectF(6, 6, self.clock_size - 12, self.clock_size - 12)
+            center = face_bounds.center()
+            radius = min(face_bounds.width(), face_bounds.height()) / 2
+
+        regions = self._get_icon_regions(center, radius)
+        click_point = QPointF(pos)
+        for name, rect in regions.items():
+            if rect.contains(click_point):
+                return name
+        return None
 
     @staticmethod
     def _draw_hand(
