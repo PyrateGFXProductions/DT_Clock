@@ -1297,6 +1297,15 @@ class FloatingAnalogClock(QWidget):
             opacity_group.addAction(oa)
             opacity_menu.addAction(oa)
 
+        menu.addSeparator()
+        autostart_action = QAction("Start at Login", self)
+        autostart_action.setCheckable(True)
+        autostart_action.setChecked(self._is_autostart_enabled())
+        autostart_action.triggered.connect(
+            lambda checked: self._set_autostart(checked)
+        )
+        menu.addAction(autostart_action)
+
         menu.exec_(pos)
 
     def _current_stopwatch_ms(self) -> int:
@@ -1522,6 +1531,58 @@ class FloatingAnalogClock(QWidget):
         action.setChecked(not checked)
         action.blockSignals(False)
         QMessageBox.warning(self, "Preference Error", f"Could not update:\n{path}")
+
+    def _is_autostart_enabled(self) -> bool:
+        if sys.platform == "win32":
+            try:
+                import winreg
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                    r"Software\Microsoft\Windows\CurrentVersion\Run",
+                    0, winreg.KEY_QUERY_VALUE)
+                try:
+                    winreg.QueryValueEx(key, "DT Clock")
+                    return True
+                except FileNotFoundError:
+                    return False
+                finally:
+                    winreg.CloseKey(key)
+            except Exception:
+                return False
+        return AUTOSTART_FILE.exists()
+
+    def _set_autostart(self, enabled: bool) -> None:
+        if sys.platform == "win32":
+            self._set_autostart_windows(enabled)
+        else:
+            ok = set_desktop_entry_enabled(
+                AUTOSTART_FILE, enabled,
+                self._runtime_launch_command(include_settings=False), autostart=True
+            )
+            if not ok:
+                QMessageBox.warning(self, "Autostart Error",
+                    f"Could not {'enable' if enabled else 'disable'} autostart.")
+
+    def _set_autostart_windows(self, enabled: bool) -> None:
+        try:
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\CurrentVersion\Run",
+                0, winreg.KEY_SET_VALUE | winreg.KEY_QUERY_VALUE)
+            if enabled:
+                if getattr(sys, 'frozen', False):
+                    cmd = f'"{sys.executable}"'
+                else:
+                    cmd = f'"{sys.executable}" "{Path(__file__).resolve()}"'
+                winreg.SetValueEx(key, "DT Clock", 0, winreg.REG_SZ, cmd)
+            else:
+                try:
+                    winreg.DeleteValue(key, "DT Clock")
+                except FileNotFoundError:
+                    pass
+            winreg.CloseKey(key)
+        except Exception as e:
+            QMessageBox.warning(self, "Autostart Error",
+                f"Could not {'enable' if enabled else 'disable'} autostart:\n{e}")
 
     def mousePressEvent(self, event) -> None:  # noqa: N802 (Qt signature)
         if event.button() != Qt.LeftButton:
@@ -1793,8 +1854,6 @@ class FloatingAnalogClock(QWidget):
         painter.setPen(_qcolor(palette["text_primary"]))
         painter.setFont(QFont("Noto Sans", max(8, self.clock_size // 20)))
         for hour in range(1, 13):
-            if hour == 3:
-                continue
             angle = math.radians(hour * 30 - 90)
             text_radius = radius - 38
             x = center.x() + text_radius * math.cos(angle)
