@@ -13,15 +13,20 @@ DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS
 ## ✨ Key Features
 
 - **🖼️ Frameless & Translucent:** A clean, minimalist design that blends into any desktop wallpaper.
-- **🖱️ Fully Interactive:** Drag to position anywhere; right-click for a comprehensive preferences menu.
+- **🖱️ Fully Interactive:** Drag to position anywhere; click the **gear** icon for quick settings, the **stopwatch** icon for stopwatch mode, or right-click for the full system menu.
 - **⏱️ Integrated Stopwatch:**
   - Start/stop with a simple click on the clock face.
   - High-precision millisecond digital readout.
   - Custom font selection for the digital display.
 - **🎨 Visual Customization:**
-  - **Themes:** Choose from Midnight, Daylight, High Contrast, and Ocean.
+  - **Themes:** Choose from Midnight, Daylight, High Contrast, Ocean, **Rolex**, **Casio**, and **Citizen**.
   - **Sizing:** Real-time scaling to fit your screen resolution.
   - **Second Hand:** Optional toggle for a cleaner look.
+  - **Day/Date Window:** Centered on the face between the 12 and the centerline — shows day abbreviation and date number.
+- **⚙️ On-Face Controls:**
+  - **Gear Icon** (7:30 position): Click to open the settings popup — change theme, analog/digital mode, size, window layer, and opacity.
+  - **Stopwatch Icon** (4:30 position): Click to toggle stopwatch mode on/off; when active, the icon glows and clicking anywhere starts/stops the timer.
+  - Icons are neatly positioned in the inner ring, clear of the hour numerals and tick marks.
 - **🪟 Window Management:**
   - **Layer Control:** Set to "Always on Top," "Normal," or "Below Windows."
   - **KDE Integration:** Specialized KWin rule helper for Linux users to ensure consistent "Keep Above" behavior.
