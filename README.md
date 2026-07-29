@@ -4,7 +4,7 @@
 
 **A sleek, customizable, and minimalist floating analog clock for your desktop.**
 
-DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS/Arch/KDE)** and **Windows**. It combines a classic analog aesthetic with modern features like transparency, window layering, and a built-in precision stopwatch.
+DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS/Arch/KDE)** and **Windows**. It combines a classic analog aesthetic with modern features like transparency, window layering, a built-in precision stopwatch, and **13 designer watch themes**.
 
 ![DT Clock Demo](images/demo.gif)
 
@@ -13,27 +13,50 @@ DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS
 ## ✨ Key Features
 
 - **🖼️ Frameless & Translucent:** A clean, minimalist design that blends into any desktop wallpaper.
-- **🖱️ Fully Interactive:** Drag to position anywhere; click the **gear** icon for quick settings, the **stopwatch** icon for stopwatch mode, or right-click for the full system menu.
+- **🖱️ Fully Interactive:** Drag to position anywhere; click the **gear** icon for the unified settings menu with every option in one place (no separate right-click menu).
+- **◻️ Face Shape Toggle:** Switch between **Round** and **Square** faces — tick marks and numerals automatically follow the perimeter contour for consistent edge spacing.
 - **⏱️ Integrated Stopwatch:**
-  - Start/stop with a simple click on the clock face.
+  - Show/hide toggle, start/stop/reset controls.
   - High-precision millisecond digital readout.
   - Custom font selection for the digital display.
-- **🎨 Visual Customization:**
-  - **Themes:** Choose from Midnight, Daylight, High Contrast, Ocean, **Rolex**, **Casio**, and **Citizen**.
-  - **Sizing:** Real-time scaling to fit your screen resolution.
-  - **Second Hand:** Optional toggle for a cleaner look.
-  - **Day/Date Window:** Centered on the face between the 12 and the centerline — shows day abbreviation and date number.
-- **⚙️ On-Face Controls:**
-  - **Gear Icon** (7:30 position): Click to open the settings popup — change theme, analog/digital mode, size, window layer, and opacity.
+- **🎨 13 Themes (7 Classic + 6 Luxury Brand):**
+  - **Classic:** Midnight, Daylight, High Contrast, Ocean
+  - **Brand-inspired:** Rolex, Casio, Citizen, Omega, Tag Heuer, Patek Philippe, IWC, Breitling, Audemars Piguet
+  - Each brand theme features authentic dial colors, signature hand styles (Mercedes, Dauphine, Baton), and brand text.
+  - Brand names auto-size to prevent clipping on long names like "AUDEMARS PIGUET".
+- **🎯 Numeral Alignment:** Hour numerals are precisely centered using bounding-rect measurement — no more "12" being off-center.
+- **🖐️ Hand Styles:** Each theme assigns a distinct hand shape — Default, Mercedes (Rolex), Dauphine (Citizen/Patek/Omega), or Baton (Casio/Tag Heuer/AP).
+- **📐 Marker Styles:** Hour markers adapt per theme — Classic lines, Rolex batons + triangle, Casio bold numerals, Citizen slim batons.
+- **🖱️ On-Face Controls:**
+  - **Gear Icon** (7:30 position): Single-click opens the **unified settings menu** — Theme, Mode, Shape, Stopwatch, Size (with presets), Layer, Opacity, Save, System (autostart, KWin, apps menu), and Quit.
   - **Stopwatch Icon** (4:30 position): Click to toggle stopwatch mode on/off; when active, the icon glows and clicking anywhere starts/stops the timer.
   - Icons are neatly positioned in the inner ring, clear of the hour numerals and tick marks.
 - **🪟 Window Management:**
   - **Layer Control:** Set to "Always on Top," "Normal," or "Below Windows."
   - **KDE Integration:** Specialized KWin rule helper for Linux users to ensure consistent "Keep Above" behavior.
 - **⚙️ Desktop Integration:**
-  - **Autostart:** Toggle "Start at login" directly from the app.
-  - **App Menu:** Automatically creates/removes desktop launcher entries.
-  - **State Persistence:** Remembers your position, size, and theme across restarts.
+  - **Autostart:** Cross-platform "Start at login" (Windows registry / Linux autostart desktop file).
+  - **App Menu:** Automatically creates/removes desktop launcher entries (Linux).
+  - **State Persistence:** Remembers your position, size, theme, shape, opacity, and stopwatch state across restarts.
+
+---
+
+## 🎮 Menu Overview
+
+Everything is accessible from the **gear icon** on the clock face — there is no separate right-click menu.
+
+| Menu Section | Options |
+|---|---|
+| **Theme** | Midnight, Daylight, High Contrast, Ocean, Rolex, Casio, Citizen, Omega, Tag Heuer, Patek Philippe, IWC, Breitling, Audemars Piguet |
+| **Mode** | Analog, Digital |
+| **Shape** | Round, Square (tick marks & numerals follow the perimeter) |
+| **Stopwatch** | Show/Hide, Start/Stop, Reset |
+| **Size** | Smaller (−20), Larger (+20), presets: Small (160), Medium (220), Large (300), XL (380) |
+| **Layer** | Always on top, Normal, Below windows |
+| **Opacity** | Ghost (15%), Translucent (40%), Modern (65%), Bold (85%), Opaque (100%) |
+| **Save** | Save Current Layout |
+| **System** | Center on screen, Start at login (cross-platform), Show in apps menu (Linux), KWin helper (KDE/Linux) |
+| **Quit** | Exit the application |
 
 ---
 
@@ -91,7 +114,11 @@ python3 floating_clock.py --on-bottom # Act as wallpaper/below windows
 3. Simply run the file to start the clock!
 
 **Note for Developers:** 
-Binaries are excluded from this repository to keep the source control lean. If you wish to build your own binary, you can use PyInstaller:
+Binaries are excluded from this repository to keep the source control lean. If you wish to build your own binary, use the provided PyInstaller spec file:
+```bash
+pyinstaller "DT Clock.spec" --noconfirm
+```
+Or manually:
 ```bash
 pyinstaller --onefile --windowed --name "DT Clock" --clean floating_clock.py
 ```
