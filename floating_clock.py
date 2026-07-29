@@ -157,6 +157,9 @@ DEFAULT_LAYER = LAYER_TOP
 
 MIN_CLOCK_SIZE = 120
 MAX_CLOCK_SIZE = 640
+
+SHAPE_ROUND = "round"
+SHAPE_SQUARE = "square"
 DEFAULT_CLOCK_SIZE = 220
 
 THEME_PRESETS = {
@@ -177,6 +180,10 @@ THEME_PRESETS = {
         "readout_label": (232, 236, 244, 180),
         "readout_text": (248, 250, 255, 245),
         "glass_highlight": (255, 255, 255, 45),
+        "marker_style": "default",
+        "hand_style": "default",
+        "brand_text": "",
+        "preferred_mode": None,
     },
     "daylight": {
         "label": "Daylight",
@@ -195,6 +202,10 @@ THEME_PRESETS = {
         "readout_label": (28, 44, 65, 210),
         "readout_text": (15, 27, 40, 245),
         "glass_highlight": (255, 255, 255, 80),
+        "marker_style": "default",
+        "hand_style": "default",
+        "brand_text": "",
+        "preferred_mode": None,
     },
     "high_contrast": {
         "label": "High Contrast",
@@ -213,6 +224,10 @@ THEME_PRESETS = {
         "readout_label": (255, 255, 255, 230),
         "readout_text": (255, 214, 0, 255),
         "glass_highlight": (255, 255, 255, 30),
+        "marker_style": "default",
+        "hand_style": "default",
+        "brand_text": "",
+        "preferred_mode": None,
     },
     "ocean": {
         "label": "Ocean",
@@ -231,6 +246,10 @@ THEME_PRESETS = {
         "readout_label": (200, 244, 255, 210),
         "readout_text": (225, 255, 247, 250),
         "glass_highlight": (255, 255, 255, 50),
+        "marker_style": "default",
+        "hand_style": "default",
+        "brand_text": "",
+        "preferred_mode": None,
     },
     "rolex": {
         "label": "Rolex",
@@ -249,6 +268,10 @@ THEME_PRESETS = {
         "readout_label": (212, 175, 55, 200),
         "readout_text": (255, 215, 0, 250),
         "glass_highlight": (255, 255, 200, 50),
+        "marker_style": "rolex",
+        "hand_style": "mercedes",
+        "brand_text": "ROLEX",
+        "preferred_mode": None,
     },
     "casio": {
         "label": "Casio",
@@ -267,6 +290,10 @@ THEME_PRESETS = {
         "readout_label": (150, 200, 245, 200),
         "readout_text": (100, 220, 255, 250),
         "glass_highlight": (200, 220, 255, 30),
+        "marker_style": "casio",
+        "hand_style": "baton",
+        "brand_text": "CASIO",
+        "preferred_mode": "digital",
     },
     "citizen": {
         "label": "Citizen",
@@ -285,9 +312,145 @@ THEME_PRESETS = {
         "readout_label": (180, 210, 245, 210),
         "readout_text": (220, 240, 255, 250),
         "glass_highlight": (200, 220, 255, 45),
+        "marker_style": "citizen",
+        "hand_style": "dauphine",
+        "brand_text": "CITIZEN",
+        "preferred_mode": None,
+    },
+    "omega": {
+        "label": "Omega",
+        "face_fill": [(28, 28, 32, 240), (15, 15, 18, 255)],
+        "face_border": (180, 180, 190, 180),
+        "major_tick": (255, 255, 255, 230),
+        "minor_tick": (220, 220, 225, 140),
+        "text_primary": (255, 255, 255, 220),
+        "text_secondary": (180, 180, 190, 200),
+        "hand_primary": (255, 255, 255, 240),
+        "hand_secondary": (220, 220, 225, 220),
+        "hand_accent": (255, 60, 60, 240),
+        "center_dot": (255, 255, 255, 250),
+        "readout_bg": (20, 20, 24, 180),
+        "readout_border": (180, 180, 190, 120),
+        "readout_label": (220, 220, 230, 200),
+        "readout_text": (255, 255, 255, 245),
+        "glass_highlight": (255, 255, 255, 40),
+        "marker_style": "default",
+        "hand_style": "dauphine",
+        "brand_text": "OMEGA",
+        "preferred_mode": None,
+    },
+    "tag_heuer": {
+        "label": "Tag Heuer",
+        "face_fill": [(235, 238, 242, 245), (218, 222, 228, 255)],
+        "face_border": (60, 60, 70, 180),
+        "major_tick": (40, 40, 50, 230),
+        "minor_tick": (80, 80, 90, 140),
+        "text_primary": (40, 40, 50, 230),
+        "text_secondary": (80, 80, 90, 200),
+        "hand_primary": (40, 40, 50, 240),
+        "hand_secondary": (60, 60, 70, 220),
+        "hand_accent": (200, 40, 40, 240),
+        "center_dot": (40, 40, 50, 250),
+        "readout_bg": (235, 238, 242, 200),
+        "readout_border": (60, 60, 70, 140),
+        "readout_label": (40, 40, 50, 210),
+        "readout_text": (200, 40, 40, 250),
+        "glass_highlight": (255, 255, 255, 60),
+        "marker_style": "casio",
+        "hand_style": "baton",
+        "brand_text": "TAG HEUER",
+        "preferred_mode": None,
+    },
+    "patek": {
+        "label": "Patek Philippe",
+        "face_fill": [(248, 242, 232, 245), (238, 230, 218, 255)],
+        "face_border": (180, 160, 130, 180),
+        "major_tick": (120, 100, 75, 230),
+        "minor_tick": (160, 140, 115, 140),
+        "text_primary": (80, 65, 50, 220),
+        "text_secondary": (140, 120, 95, 200),
+        "hand_primary": (140, 120, 95, 240),
+        "hand_secondary": (160, 140, 115, 220),
+        "hand_accent": (60, 80, 180, 240),
+        "center_dot": (140, 120, 95, 250),
+        "readout_bg": (248, 242, 232, 200),
+        "readout_border": (180, 160, 130, 140),
+        "readout_label": (120, 100, 75, 210),
+        "readout_text": (60, 50, 40, 250),
+        "glass_highlight": (255, 255, 240, 60),
+        "marker_style": "default",
+        "hand_style": "dauphine",
+        "brand_text": "PATEK PHILIPPE",
+        "preferred_mode": None,
+    },
+    "iwc": {
+        "label": "IWC",
+        "face_fill": [(18, 20, 24, 248), (10, 12, 15, 255)],
+        "face_border": (220, 220, 225, 180),
+        "major_tick": (255, 255, 255, 240),
+        "minor_tick": (200, 200, 210, 150),
+        "text_primary": (255, 255, 255, 245),
+        "text_secondary": (200, 200, 210, 220),
+        "hand_primary": (200, 220, 255, 240),
+        "hand_secondary": (180, 200, 240, 220),
+        "hand_accent": (255, 80, 60, 240),
+        "center_dot": (255, 255, 255, 250),
+        "readout_bg": (12, 14, 18, 200),
+        "readout_border": (220, 220, 225, 130),
+        "readout_label": (200, 200, 210, 210),
+        "readout_text": (255, 255, 255, 250),
+        "glass_highlight": (255, 255, 255, 30),
+        "marker_style": "default",
+        "hand_style": "default",
+        "brand_text": "IWC",
+        "preferred_mode": None,
+    },
+    "breitling": {
+        "label": "Breitling",
+        "face_fill": [(18, 35, 60, 245), (12, 24, 45, 255)],
+        "face_border": (190, 190, 200, 180),
+        "major_tick": (255, 255, 255, 230),
+        "minor_tick": (180, 200, 220, 140),
+        "text_primary": (255, 255, 255, 225),
+        "text_secondary": (200, 215, 230, 200),
+        "hand_primary": (255, 255, 255, 240),
+        "hand_secondary": (200, 215, 230, 220),
+        "hand_accent": (255, 180, 20, 240),
+        "center_dot": (255, 255, 255, 250),
+        "readout_bg": (12, 24, 42, 180),
+        "readout_border": (190, 190, 200, 130),
+        "readout_label": (200, 215, 230, 210),
+        "readout_text": (255, 255, 255, 250),
+        "glass_highlight": (200, 220, 255, 35),
+        "marker_style": "default",
+        "hand_style": "mercedes",
+        "brand_text": "BREITLING",
+        "preferred_mode": None,
+    },
+    "ap": {
+        "label": "Audemars Piguet",
+        "face_fill": [(80, 88, 98, 245), (55, 62, 72, 255)],
+        "face_border": (180, 190, 200, 180),
+        "major_tick": (220, 230, 240, 230),
+        "minor_tick": (160, 170, 185, 145),
+        "text_primary": (220, 230, 240, 220),
+        "text_secondary": (180, 190, 205, 200),
+        "hand_primary": (220, 230, 240, 240),
+        "hand_secondary": (180, 190, 205, 220),
+        "hand_accent": (60, 160, 220, 240),
+        "center_dot": (220, 230, 240, 250),
+        "readout_bg": (40, 48, 58, 200),
+        "readout_border": (180, 190, 200, 140),
+        "readout_label": (200, 210, 225, 210),
+        "readout_text": (220, 230, 240, 250),
+        "glass_highlight": (200, 220, 255, 40),
+        "marker_style": "default",
+        "hand_style": "baton",
+        "brand_text": "AUDEMARS PIGUET",
+        "preferred_mode": None,
     },
 }
-THEME_ORDER = ["midnight", "daylight", "high_contrast", "ocean", "rolex", "casio", "citizen"]
+THEME_ORDER = ["midnight", "daylight", "high_contrast", "ocean", "rolex", "casio", "citizen", "omega", "tag_heuer", "patek", "iwc", "breitling", "ap"]
 DEFAULT_THEME = "midnight"
 
 PREFERRED_READOUT_FONTS = [
@@ -338,6 +501,12 @@ def _valid_size(size: int | str | None) -> int:
     except (TypeError, ValueError):
         parsed = DEFAULT_CLOCK_SIZE
     return max(MIN_CLOCK_SIZE, min(MAX_CLOCK_SIZE, parsed))
+
+
+def _valid_shape(shape: str | None) -> str:
+    if shape in (SHAPE_ROUND, SHAPE_SQUARE):
+        return shape
+    return SHAPE_ROUND
 
 
 def _qcolor(values: tuple[int, ...] | list[tuple[int, ...]], alpha_scale: float = 1.0) -> QColor:
@@ -774,6 +943,7 @@ class FloatingAnalogClock(QWidget):
         stopwatch_active: bool,
         color_theme: str,
         readout_font: str,
+        face_shape: str = SHAPE_ROUND,
         initial_x: int = 0,
         initial_y: int = 0,
     ):
@@ -784,6 +954,7 @@ class FloatingAnalogClock(QWidget):
         self.show_seconds = show_seconds
         self.face_alpha = _clamp_opacity(face_alpha)
 
+        self.face_shape = _valid_shape(face_shape)
         self.mode = _valid_mode(mode)
         self.stopwatch_active = stopwatch_active
         self.color_theme = _valid_theme(color_theme)
@@ -1011,6 +1182,7 @@ class FloatingAnalogClock(QWidget):
                 "readout_font": self.readout_font_family,
                 "opacity": self.face_alpha,
                 "show_seconds": self.show_seconds,
+                "face_shape": self.face_shape,
             }
             
             _log(f"Saving state (manual={manual}): x={current_x}, y={current_y}, size={self.clock_size}, opacity={self.face_alpha:.2f}")
@@ -1178,6 +1350,13 @@ class FloatingAnalogClock(QWidget):
         if normalized_theme == self.color_theme:
             return
         self.color_theme = normalized_theme
+
+        # Auto-switch mode if the theme has a preferred mode (e.g. Casio → digital)
+        theme_data = THEME_PRESETS.get(normalized_theme, {})
+        preferred = theme_data.get("preferred_mode")
+        if preferred is not None and preferred != self.mode:
+            self.set_mode(preferred, persist=False)
+
         self.update()
         self.repaint()
         if persist:
@@ -1220,9 +1399,21 @@ class FloatingAnalogClock(QWidget):
             "Could not reload KWin rules automatically. Log out/in if needed.",
         )
 
+    def set_face_shape(self, shape: str, persist: bool = True) -> None:
+        normalized = _valid_shape(shape)
+        if normalized == self.face_shape:
+            return
+        self.face_shape = normalized
+        self.update()
+        self.repaint()
+        if persist:
+            self.save_state()
+
     def _open_settings_menu(self, pos: QPoint) -> None:
+        """Unified settings menu from the gear icon — all options in one place."""
         menu = QMenu(self)
 
+        # ── Theme ──
         theme_menu = menu.addMenu("Theme")
         theme_group = QActionGroup(theme_menu)
         theme_group.setExclusive(True)
@@ -1237,27 +1428,57 @@ class FloatingAnalogClock(QWidget):
             theme_group.addAction(theme_action)
             theme_menu.addAction(theme_action)
 
-        menu.addSeparator()
-
-        mode_group = QActionGroup(menu)
+        # ── Mode ──
+        mode_menu = menu.addMenu("Mode")
+        mode_group = QActionGroup(mode_menu)
         mode_group.setExclusive(True)
-
         analog_action = QAction("Analog", self)
         analog_action.setCheckable(True)
         analog_action.setChecked(self.mode == MODE_ANALOG)
         analog_action.triggered.connect(lambda _checked=False: self.set_mode(MODE_ANALOG))
         mode_group.addAction(analog_action)
-        menu.addAction(analog_action)
-
+        mode_menu.addAction(analog_action)
         digital_action = QAction("Digital", self)
         digital_action.setCheckable(True)
         digital_action.setChecked(self.mode == MODE_DIGITAL)
         digital_action.triggered.connect(lambda _checked=False: self.set_mode(MODE_DIGITAL))
         mode_group.addAction(digital_action)
-        menu.addAction(digital_action)
+        mode_menu.addAction(digital_action)
 
-        menu.addSeparator()
+        # ── Shape ──
+        shape_menu = menu.addMenu("Shape")
+        shape_group = QActionGroup(shape_menu)
+        shape_group.setExclusive(True)
+        round_action = QAction("Round", self)
+        round_action.setCheckable(True)
+        round_action.setChecked(self.face_shape == SHAPE_ROUND)
+        round_action.triggered.connect(lambda _checked=False: self.set_face_shape(SHAPE_ROUND))
+        shape_group.addAction(round_action)
+        shape_menu.addAction(round_action)
+        square_action = QAction("Square", self)
+        square_action.setCheckable(True)
+        square_action.setChecked(self.face_shape == SHAPE_SQUARE)
+        square_action.triggered.connect(lambda _checked=False: self.set_face_shape(SHAPE_SQUARE))
+        shape_group.addAction(square_action)
+        shape_menu.addAction(square_action)
 
+        # ── Stopwatch ──
+        stopwatch_menu = menu.addMenu("Stopwatch")
+        sw_toggle = QAction("Show Stopwatch" if not self.stopwatch_active else "Hide Stopwatch", self)
+        sw_toggle.triggered.connect(self.toggle_stopwatch)
+        stopwatch_menu.addAction(sw_toggle)
+        if self.stopwatch_active:
+            start_stop = QAction(
+                "Stop stopwatch" if self.stopwatch_running else "Start stopwatch", self
+            )
+            start_stop.triggered.connect(self.toggle_stopwatch_running)
+            reset = QAction("Reset stopwatch", self)
+            reset.triggered.connect(self.reset_stopwatch)
+            stopwatch_menu.addSeparator()
+            stopwatch_menu.addAction(start_stop)
+            stopwatch_menu.addAction(reset)
+
+        # ── Size ──
         size_menu = menu.addMenu("Size")
         size_down = QAction("Smaller (−20)", self)
         size_down.triggered.connect(lambda: self.set_clock_size(self.clock_size - 20))
@@ -1268,13 +1489,22 @@ class FloatingAnalogClock(QWidget):
         size_up.setEnabled(self.clock_size < MAX_CLOCK_SIZE)
         size_menu.addAction(size_up)
         size_menu.addSeparator()
-        for label, sz in [("Small 160", 160), ("Medium 220", 220), ("Large 300", 300), ("XL 380", 380)]:
+        size_group = QActionGroup(size_menu)
+        size_group.setExclusive(True)
+        for label, size_value in [
+            ("Small (160)", 160),
+            ("Medium (220)", 220),
+            ("Large (300)", 300),
+            ("XL (380)", 380),
+        ]:
             sa = QAction(label, self)
             sa.setCheckable(True)
-            sa.setChecked(abs(self.clock_size - sz) <= 8)
-            sa.triggered.connect(lambda _checked=False, v=sz: self.set_clock_size(v))
+            sa.setChecked(abs(self.clock_size - size_value) <= 8)
+            sa.triggered.connect(lambda _checked=False, value=size_value: self.set_clock_size(value))
+            size_group.addAction(sa)
             size_menu.addAction(sa)
 
+        # ── Layer ──
         layer_menu = menu.addMenu("Layer")
         layer_group = QActionGroup(layer_menu)
         layer_group.setExclusive(True)
@@ -1286,6 +1516,7 @@ class FloatingAnalogClock(QWidget):
             layer_group.addAction(la)
             layer_menu.addAction(la)
 
+        # ── Opacity ──
         opacity_menu = menu.addMenu("Opacity")
         opacity_group = QActionGroup(opacity_menu)
         opacity_group.setExclusive(True)
@@ -1298,13 +1529,68 @@ class FloatingAnalogClock(QWidget):
             opacity_menu.addAction(oa)
 
         menu.addSeparator()
-        autostart_action = QAction("Start at Login", self)
+
+        # ── Save ──
+        save_action = QAction("Save Current Layout", self)
+        save_action.triggered.connect(lambda: self.save_state(manual=True))
+        menu.addAction(save_action)
+
+        menu.addSeparator()
+
+        # ── System ──
+        sys_menu = menu.addMenu("System")
+        center_action = QAction("Center on screen", self)
+        center_action.triggered.connect(lambda: (self.center_on_screen(), self.save_state(manual=True)))
+        sys_menu.addAction(center_action)
+
+        sys_menu.addSeparator()
+
+        # Autostart (cross-platform)
+        autostart_action = QAction("Start at login", self)
         autostart_action.setCheckable(True)
         autostart_action.setChecked(self._is_autostart_enabled())
-        autostart_action.triggered.connect(
-            lambda checked: self._set_autostart(checked)
-        )
-        menu.addAction(autostart_action)
+        autostart_action.triggered.connect(lambda checked: self._set_autostart(checked))
+        sys_menu.addAction(autostart_action)
+
+        if sys.platform != "win32":
+            # Apps menu (Linux-only)
+            apps_action = QAction("Show in apps menu", self)
+            apps_action.setCheckable(True)
+            apps_action.setChecked(MENU_ENTRY_FILE.exists())
+            apps_action.triggered.connect(
+                lambda checked, action=apps_action: self._toggle_entry(
+                    action, checked, MENU_ENTRY_FILE, autostart=False
+                )
+            )
+            sys_menu.addAction(apps_action)
+
+            # KWin helper (Linux/KDE-only)
+            sys_menu.addSeparator()
+            kwin_menu = sys_menu.addMenu("KWin helper")
+            kwin_available = _is_kde_session() and _resolve_kwin_tools() is not None
+
+            kwin_rule_action = QAction("Fix Layer/Persistence via KDE Rule", self)
+            kwin_rule_action.setCheckable(True)
+            kwin_rule_action.setChecked(is_kwin_rule_enabled())
+            kwin_rule_action.triggered.connect(
+                lambda checked, action=kwin_rule_action: self._toggle_kwin_rule(action, checked)
+            )
+            kwin_menu.addAction(kwin_rule_action)
+
+            reload_kwin = QAction("Reload KWin rules", self)
+            reload_kwin.setEnabled(kwin_available)
+            reload_kwin.triggered.connect(self._reload_kwin_rules_with_feedback)
+            kwin_menu.addAction(reload_kwin)
+
+            if not kwin_available:
+                kwin_disabled = QAction("Unavailable outside KDE/KWin", self)
+                kwin_disabled.setEnabled(False)
+                kwin_menu.addAction(kwin_disabled)
+
+        menu.addSeparator()
+        quit_action = QAction("Quit", self)
+        quit_action.triggered.connect(QApplication.instance().quit)
+        menu.addAction(quit_action)
 
         menu.exec_(pos)
 
@@ -1333,191 +1619,6 @@ class FloatingAnalogClock(QWidget):
         if self.stopwatch_running:
             self.stopwatch_start_time = time.perf_counter()
         self.update()
-
-    def contextMenuEvent(self, event) -> None:  # noqa: N802 (Qt signature)
-        menu = QMenu(self)
-
-        save_settings_action = QAction("SAVE CURRENT LAYOUT", self)
-        save_settings_action.setIconText("💾")
-        save_settings_action.triggered.connect(lambda: self.save_state(manual=True))
-        menu.addAction(save_settings_action)
-        menu.addSeparator()
-
-        mode_menu = menu.addMenu("Mode")
-        mode_group = QActionGroup(mode_menu)
-        mode_group.setExclusive(True)
-
-        analog_mode_action = QAction("Analog Clock", self)
-        analog_mode_action.setCheckable(True)
-        analog_mode_action.setChecked(self.mode == MODE_ANALOG)
-        analog_mode_action.triggered.connect(lambda _checked=False: self.set_mode(MODE_ANALOG))
-        mode_group.addAction(analog_mode_action)
-        mode_menu.addAction(analog_mode_action)
-
-        digital_mode_action = QAction("Digital Clock", self)
-        digital_mode_action.setCheckable(True)
-        digital_mode_action.setChecked(self.mode == MODE_DIGITAL)
-        digital_mode_action.triggered.connect(lambda _checked=False: self.set_mode(MODE_DIGITAL))
-        mode_group.addAction(digital_mode_action)
-        mode_menu.addAction(digital_mode_action)
-
-        stopwatch_menu = menu.addMenu("Stopwatch")
-        
-        toggle_stopwatch_action = QAction("Show Stopwatch" if not self.stopwatch_active else "Hide Stopwatch", self)
-        toggle_stopwatch_action.triggered.connect(self.toggle_stopwatch)
-        stopwatch_menu.addAction(toggle_stopwatch_action)
-        
-        if self.stopwatch_active:
-            start_stop_action = QAction(
-                "Stop stopwatch" if self.stopwatch_running else "Start stopwatch", self
-            )
-            start_stop_action.triggered.connect(self.toggle_stopwatch_running)
-            reset_action = QAction("Reset stopwatch", self)
-            reset_action.triggered.connect(self.reset_stopwatch)
-            stopwatch_menu.addSeparator()
-            stopwatch_menu.addAction(start_stop_action)
-            stopwatch_menu.addAction(reset_action)
-
-        prefs_menu = menu.addMenu("Preferences")
-
-        theme_menu = prefs_menu.addMenu("Themes")
-        theme_group = QActionGroup(theme_menu)
-        theme_group.setExclusive(True)
-        for theme_key in THEME_ORDER:
-            theme_data = THEME_PRESETS[theme_key]
-            theme_action = QAction(theme_data["label"], self)
-            theme_action.setCheckable(True)
-            theme_action.setChecked(self.color_theme == theme_key)
-            theme_action.triggered.connect(
-                lambda _checked=False, key=theme_key: self.set_color_theme(key)
-            )
-            theme_group.addAction(theme_action)
-            theme_menu.addAction(theme_action)
-
-        size_menu = prefs_menu.addMenu("Clock size")
-        size_down_action = QAction("Smaller", self)
-        size_down_action.triggered.connect(lambda: self.set_clock_size(self.clock_size - 20))
-        size_down_action.setEnabled(self.clock_size > MIN_CLOCK_SIZE)
-        size_menu.addAction(size_down_action)
-
-        size_up_action = QAction("Larger", self)
-        size_up_action.triggered.connect(lambda: self.set_clock_size(self.clock_size + 20))
-        size_up_action.setEnabled(self.clock_size < MAX_CLOCK_SIZE)
-        size_menu.addAction(size_up_action)
-
-        size_menu.addSeparator()
-        size_group = QActionGroup(size_menu)
-        size_group.setExclusive(True)
-        for label, size_value in [
-            ("Small (160)", 160),
-            ("Medium (220)", 220),
-            ("Large (300)", 300),
-            ("XL (380)", 380),
-        ]:
-            size_action = QAction(label, self)
-            size_action.setCheckable(True)
-            size_action.setChecked(abs(self.clock_size - size_value) <= 8)
-            size_action.triggered.connect(lambda _checked=False, value=size_value: self.set_clock_size(value))
-            size_group.addAction(size_action)
-            size_menu.addAction(size_action)
-
-        layer_menu = prefs_menu.addMenu("Window layer")
-        layer_group = QActionGroup(layer_menu)
-        layer_group.setExclusive(True)
-        for label, layer_value in [
-            ("Always on top", LAYER_TOP),
-            ("Normal", LAYER_NORMAL),
-            ("Below windows", LAYER_BOTTOM),
-        ]:
-            layer_action = QAction(label, self)
-            layer_action.setCheckable(True)
-            layer_action.setChecked(self.layer == layer_value)
-            layer_action.triggered.connect(
-                lambda _checked=False, value=layer_value: self.set_layer(value)
-            )
-            layer_group.addAction(layer_action)
-            layer_menu.addAction(layer_action)
-
-        opacity_menu = prefs_menu.addMenu("Background opacity")
-        opacity_group = QActionGroup(opacity_menu)
-        opacity_group.setExclusive(True)
-        for label, alpha_val in [
-            ("Ghost (15%)", 0.15),
-            ("Translucent (40%)", 0.40),
-            ("Modern (65%)", 0.65),
-            ("Bold (85%)", 0.85),
-            ("Opaque (100%)", 1.0),
-        ]:
-            opacity_action = QAction(label, self)
-            opacity_action.setCheckable(True)
-            # Use a small epsilon for float comparison
-            opacity_action.setChecked(abs(self.face_alpha - alpha_val) < 0.05)
-            opacity_action.triggered.connect(
-                lambda _checked=False, val=alpha_val: self.set_face_alpha(val)
-            )
-            opacity_group.addAction(opacity_action)
-            opacity_menu.addAction(opacity_action)
-
-        menu.addSeparator()
-        
-        # Admin / System menu
-        sys_menu = menu.addMenu("System")
-        center_action = QAction("Center on screen", self)
-        center_action.triggered.connect(lambda: (self.center_on_screen(), self.save_state(manual=True)))
-        sys_menu.addAction(center_action)
-        
-        if sys.platform != "win32":
-            sys_menu.addSeparator()
-            
-            apps_action = QAction("Show in apps menu", self)
-            apps_action.setCheckable(True)
-            apps_action.setChecked(MENU_ENTRY_FILE.exists())
-            apps_action.triggered.connect(
-                lambda checked, action=apps_action: self._toggle_entry(
-                    action, checked, MENU_ENTRY_FILE, autostart=False
-                )
-            )
-            sys_menu.addAction(apps_action)
-
-            autostart_action = QAction("Start at login", self)
-            autostart_action.setCheckable(True)
-            autostart_action.setChecked(AUTOSTART_FILE.exists())
-            autostart_action.triggered.connect(
-                lambda checked, action=autostart_action: self._toggle_entry(
-                    action, checked, AUTOSTART_FILE, autostart=True
-                )
-            )
-            sys_menu.addAction(autostart_action)
-            
-            sys_menu.addSeparator()
-            
-            kwin_menu = sys_menu.addMenu("KWin helper")
-            kwin_available = _is_kde_session() and _resolve_kwin_tools() is not None
-
-            kwin_hint_action = QAction("Fix Layer/Persistence via KDE Rule", self)
-            kwin_hint_action.setCheckable(True)
-            enabled = is_kwin_rule_enabled()
-            kwin_hint_action.setChecked(enabled)
-            kwin_hint_action.triggered.connect(
-                lambda checked, action=kwin_hint_action: self._toggle_kwin_rule(action, checked)
-            )
-            sys_menu.addAction(kwin_hint_action)
-
-            reload_kwin_action = QAction("Reload KWin rules", self)
-            reload_kwin_action.setEnabled(kwin_available)
-            reload_kwin_action.triggered.connect(self._reload_kwin_rules_with_feedback)
-            kwin_menu.addAction(reload_kwin_action)
-
-            if not kwin_available:
-                kwin_hint_action = QAction("Unavailable outside KDE/KWin", self)
-                kwin_hint_action.setEnabled(False)
-                kwin_menu.addAction(kwin_hint_action)
-
-        quit_action = QAction("Quit", self)
-        quit_action.triggered.connect(QApplication.instance().quit)
-        menu.addAction(quit_action)
-
-        menu.exec_(event.globalPos())
 
     def _toggle_entry(self, action: QAction, checked: bool, path: Path, autostart: bool) -> None:
         # For launchers/autostart, we omit explicit settings flags so the app loads the latest saved state.
@@ -1677,9 +1778,12 @@ class FloatingAnalogClock(QWidget):
             face_bounds = QRectF(6, 6, self.width() - 12, self.height() - 12)
         else:
             face_bounds = QRectF(6, 6, self.clock_size - 12, self.clock_size - 12)
-            
+
         center = face_bounds.center()
         radius = min(face_bounds.width(), face_bounds.height()) / 2
+
+        # Corner radius for square face
+        face_corner_radius = max(6, self.clock_size * 0.11)
 
         # Draw Face with Gradient (uses face_alpha)
         gradient = QLinearGradient(face_bounds.topLeft(), face_bounds.bottomRight())
@@ -1691,11 +1795,13 @@ class FloatingAnalogClock(QWidget):
         border_color = _qcolor(palette["face_border"], border_alpha)
         painter.setPen(QPen(border_color, 1.5))
         painter.setBrush(QBrush(gradient))
-        
+
+        # Face shape: pill for digital, rounded_rect for square, circle for round
         if self.mode == MODE_DIGITAL:
-            # Draw pill shape
-            corner_radius = radius
-            painter.drawRoundedRect(face_bounds, corner_radius, corner_radius)
+            pill_corner = radius
+            painter.drawRoundedRect(face_bounds, pill_corner, pill_corner)
+        elif self.face_shape == SHAPE_SQUARE:
+            painter.drawRoundedRect(face_bounds, face_corner_radius, face_corner_radius)
         else:
             painter.drawEllipse(face_bounds)
 
@@ -1705,16 +1811,18 @@ class FloatingAnalogClock(QWidget):
         highlight_color = _qcolor(palette["glass_highlight"], self.face_alpha)
         glass_grad.setColorAt(0, highlight_color)
         glass_grad.setColorAt(1, Qt.transparent)
-        
+
         painter.setPen(Qt.NoPen)
         painter.setBrush(glass_grad)
         if self.mode == MODE_DIGITAL:
-            painter.drawRoundedRect(face_bounds, corner_radius, corner_radius)
+            painter.drawRoundedRect(face_bounds, pill_corner, pill_corner)
+        elif self.face_shape == SHAPE_SQUARE:
+            painter.drawRoundedRect(face_bounds, face_corner_radius, face_corner_radius)
         else:
             painter.drawEllipse(face_bounds)
 
-        # NOTE: Foreground elements (tick marks, hands, etc.) 
-        # do NOT use alpha_scale inside their draw methods below, 
+        # NOTE: Foreground elements (tick marks, hands, etc.)
+        # do NOT use alpha_scale inside their draw methods below,
         # making them independent of face_alpha.
 
         if self.stopwatch_active:
@@ -1731,7 +1839,7 @@ class FloatingAnalogClock(QWidget):
                 self._draw_clock_tick_marks(painter, center, radius, palette)
                 self._draw_clock_hands(painter, center, radius, palette)
 
-        # Draw Center Dot (Analog only)
+        # Draw Center Dot (Analog only, not in stopwatch mode)
         if self.mode == MODE_ANALOG and not self.stopwatch_active:
             painter.setPen(Qt.NoPen)
             painter.setBrush(_qcolor(palette["center_dot"]))
@@ -1740,6 +1848,10 @@ class FloatingAnalogClock(QWidget):
         # Day/Date window centered between 12 and centerline (analog only)
         if self.mode == MODE_ANALOG and not self.stopwatch_active:
             self._draw_day_date(painter, center, radius, palette)
+
+        # Brand text on dial face (analog, non-stopwatch only)
+        if palette.get("brand_text") and self.mode == MODE_ANALOG and not self.stopwatch_active:
+            self._draw_brand_text(painter, center, radius, palette)
 
         # Settings gear icon
         icon_size_draw = max(11, radius * 0.12)
@@ -1825,22 +1937,51 @@ class FloatingAnalogClock(QWidget):
             painter.setPen(_qcolor(palette["text_secondary"]))
             painter.drawText(label_rect, Qt.AlignCenter, label)
 
+    @staticmethod
+    def _sq_edge_dist(half_size: float, angle_deg: float) -> float:
+        """Distance from center to square edge at given angle (deg).
+        For circle shape, this simply returns half_size (constant).
+        """
+        angle_rad = math.radians(angle_deg)
+        cos_a = abs(math.cos(angle_rad))
+        sin_a = abs(math.sin(angle_rad))
+        if cos_a == 0 and sin_a == 0:
+            return half_size
+        return half_size / max(cos_a, sin_a)
+
     def _draw_clock_tick_marks(
         self, painter: QPainter, center: QPointF, radius: float, palette: dict
     ) -> None:
+        """Dispatch to marker-style renderer based on theme config."""
+        marker_style = palette.get("marker_style", "default")
+        if marker_style == "rolex":
+            self._draw_rolex_markers(painter, center, radius, palette)
+        elif marker_style == "casio":
+            self._draw_casio_markers(painter, center, radius, palette)
+        elif marker_style == "citizen":
+            self._draw_citizen_markers(painter, center, radius, palette)
+        else:
+            self._draw_default_markers(painter, center, radius, palette)
+
+    def _draw_default_markers(
+        self, painter: QPainter, center: QPointF, radius: float, palette: dict
+    ) -> None:
+        """Classic tick marks: lines + numerals (original default)."""
         for step in range(60):
-            angle = math.radians(step * 6 - 90)
+            angle_deg = step * 6 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
             outer = QPointF(
-                center.x() + (radius - 10) * math.cos(angle),
-                center.y() + (radius - 10) * math.sin(angle),
+                center.x() + (edge_dist - 10) * math.cos(angle),
+                center.y() + (edge_dist - 10) * math.sin(angle),
             )
 
             if step % 5 == 0:
-                inner_distance = radius - 24
+                inner_distance = edge_dist - 24
                 thickness = 2.6
                 color = _qcolor(palette["major_tick"])
             else:
-                inner_distance = radius - 18
+                inner_distance = edge_dist - 18
                 thickness = 1.2
                 color = _qcolor(palette["minor_tick"])
 
@@ -1851,31 +1992,218 @@ class FloatingAnalogClock(QWidget):
             painter.setPen(QPen(color, thickness))
             painter.drawLine(inner, outer)
 
-        painter.setPen(_qcolor(palette["text_primary"]))
         painter.setFont(QFont("Noto Sans", max(8, self.clock_size // 20)))
+        numeral_color = _qcolor(palette["text_primary"])
         for hour in range(1, 13):
-            angle = math.radians(hour * 30 - 90)
-            text_radius = radius - 38
+            angle_deg = hour * 30 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            text_radius = edge_dist - 38
             x = center.x() + text_radius * math.cos(angle)
             y = center.y() + text_radius * math.sin(angle)
-            painter.drawText(int(x - 6), int(y + 5), str(hour))
+            self._draw_centered_numeral(painter, x, y, str(hour), numeral_color)
+
+    def _draw_rolex_markers(
+        self, painter: QPainter, center: QPointF, radius: float, palette: dict
+    ) -> None:
+        """Rolex-style: triangle at 12, batons at other hours, minute track."""
+        # Minute track (60 dots/ticks around perimeter)
+        for step in range(60):
+            angle_deg = step * 6 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            outer_r = edge_dist - 8
+            inner_r = (edge_dist - 14) if step % 5 == 0 else (edge_dist - 12)
+            color = _qcolor(palette["major_tick"] if step % 5 == 0 else palette["minor_tick"])
+            thickness = 2.0 if step % 5 == 0 else 1.0
+            painter.setPen(QPen(color, thickness))
+            painter.drawLine(
+                QPointF(center.x() + inner_r * math.cos(angle), center.y() + inner_r * math.sin(angle)),
+                QPointF(center.x() + outer_r * math.cos(angle), center.y() + outer_r * math.sin(angle)),
+            )
+
+        # Hour markers: triangle at 12, batons at others
+        tri_size = radius * 0.07
+        for hour in range(1, 13):
+            angle_deg = hour * 30 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            marker_r = edge_dist - 26
+            x = center.x() + marker_r * math.cos(angle)
+            y = center.y() + marker_r * math.sin(angle)
+
+            if hour == 12:
+                # Downward-pointing triangle (tip toward center)
+                p1 = QPointF(x, y + tri_size * 0.9)      # tip (closer to center)
+                p2 = QPointF(x - tri_size * 1.2, y - tri_size * 0.6)  # base left
+                p3 = QPointF(x + tri_size * 1.2, y - tri_size * 0.6)  # base right
+                painter.setPen(Qt.NoPen)
+                painter.setBrush(_qcolor(palette["major_tick"]))
+                painter.drawPolygon(p1, p2, p3)
+            elif hour in (3, 6, 9):
+                # Double baton
+                half_w = tri_size * 0.35
+                half_h = tri_size * 0.9
+                painter.setPen(Qt.NoPen)
+                painter.setBrush(_qcolor(palette["major_tick"]))
+                painter.drawRoundedRect(
+                    QRectF(x - half_w * 2, y - half_h, half_w * 4, half_h * 2),
+                    half_w * 0.5, half_w * 0.5,
+                )
+            else:
+                # Single baton
+                half_w = tri_size * 0.3
+                half_h = tri_size * 0.7
+                painter.setPen(Qt.NoPen)
+                painter.setBrush(_qcolor(palette["major_tick"]))
+                painter.drawRoundedRect(
+                    QRectF(x - half_w, y - half_h, half_w * 2, half_h * 2),
+                    half_w * 0.5, half_w * 0.5,
+                )
+
+        # Hour numerals (discreet, modern)
+        painter.setFont(QFont("Noto Sans", max(7, self.clock_size // 22)))
+        numeral_color = _qcolor(palette["text_primary"])
+        for hour in range(1, 13):
+            angle_deg = hour * 30 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            text_radius = edge_dist - 44
+            x = center.x() + text_radius * math.cos(angle)
+            y = center.y() + text_radius * math.sin(angle)
+            self._draw_centered_numeral(painter, x, y, str(hour), numeral_color)
+
+    def _draw_casio_markers(
+        self, painter: QPainter, center: QPointF, radius: float, palette: dict
+    ) -> None:
+        """Casio-style: triangle at 12, bold rectangular at 3/6/9, line ticks elsewhere."""
+        # Minute ticks — outer stay near edge, inner shortened to avoid crowding bold numerals
+        for step in range(60):
+            angle_deg = step * 6 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            outer_r = edge_dist - 10
+            if step % 5 == 0:
+                inner_r = edge_dist - 22  # shortened from -26 to leave room for bold numerals
+                thickness = 2.4
+                color = _qcolor(palette["major_tick"])
+            else:
+                inner_r = edge_dist - 16  # shortened from -18
+                thickness = 1.2
+                color = _qcolor(palette["minor_tick"])
+            painter.setPen(QPen(color, thickness))
+            painter.drawLine(
+                QPointF(center.x() + inner_r * math.cos(angle), center.y() + inner_r * math.sin(angle)),
+                QPointF(center.x() + outer_r * math.cos(angle), center.y() + outer_r * math.sin(angle)),
+            )
+
+        # Triangle at 12
+        tri_size = radius * 0.065
+        for hour in [12]:
+            angle_deg = 0 - 90  # 12 o'clock
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            marker_r = edge_dist - 32
+            x = center.x() + marker_r * math.cos(angle)
+            y = center.y() + marker_r * math.sin(angle)
+            p1 = QPointF(x, y + tri_size * 1.0)     # tip (toward center)
+            p2 = QPointF(x - tri_size * 1.4, y - tri_size * 0.5)  # base left
+            p3 = QPointF(x + tri_size * 1.4, y - tri_size * 0.5)  # base right
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(_qcolor(palette["major_tick"]))
+            painter.drawPolygon(p1, p2, p3)
+
+        # Bold numerals — positioned further inward to avoid overlapping ticks
+        font_sz = max(9, self.clock_size // 18)
+        painter.setFont(QFont("Noto Sans", font_sz, QFont.Bold))
+        numeral_color = _qcolor(palette["text_primary"])
+        for hour in range(1, 13):
+            angle_deg = hour * 30 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            text_radius = edge_dist - 46 if hour == 12 else edge_dist - 40  # moved inward from -42/-36
+            x = center.x() + text_radius * math.cos(angle)
+            y = center.y() + text_radius * math.sin(angle)
+            self._draw_centered_numeral(painter, x, y, str(hour), numeral_color)
+
+    def _draw_citizen_markers(
+        self, painter: QPainter, center: QPointF, radius: float, palette: dict
+    ) -> None:
+        """Citizen-style: slim baton markers with elegant minute track."""
+        # Fine minute track
+        for step in range(60):
+            angle_deg = step * 6 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            outer_r = edge_dist - 10
+            if step % 5 == 0:
+                inner_r = edge_dist - 20
+                thickness = 2.2
+                color = _qcolor(palette["major_tick"])
+            else:
+                inner_r = edge_dist - 15
+                thickness = 1.0
+                color = _qcolor(palette["minor_tick"])
+            painter.setPen(QPen(color, thickness))
+            painter.drawLine(
+                QPointF(center.x() + inner_r * math.cos(angle), center.y() + inner_r * math.sin(angle)),
+                QPointF(center.x() + outer_r * math.cos(angle), center.y() + outer_r * math.sin(angle)),
+            )
+
+        # Elegant baton markers at each hour
+        baton_w = max(2.5, radius * 0.025)
+        baton_h = max(6, radius * 0.08)
+        for hour in range(1, 13):
+            angle_deg = hour * 30 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            marker_r = edge_dist - 29
+            x = center.x() + marker_r * math.cos(angle)
+            y = center.y() + marker_r * math.sin(angle)
+
+            # Rotate the baton to point radially
+            painter.save()
+            painter.translate(x, y)
+            painter.rotate(hour * 30)
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(_qcolor(palette["major_tick"]))
+            painter.drawRoundedRect(
+                QRectF(-baton_w, -baton_h, baton_w * 2, baton_h * 2),
+                baton_w * 0.5, baton_w * 0.5,
+            )
+            painter.restore()
+
+        # Numerals (elegant, slightly inside the batons)
+        font_sz = max(7, self.clock_size // 22)
+        painter.setFont(QFont("Noto Sans", font_sz, QFont.Light))
+        numeral_color = _qcolor(palette["text_primary"])
+        for hour in range(1, 13):
+            angle_deg = hour * 30 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            text_radius = edge_dist - 42
+            x = center.x() + text_radius * math.cos(angle)
+            y = center.y() + text_radius * math.sin(angle)
+            self._draw_centered_numeral(painter, x, y, str(hour), numeral_color)
 
     def _draw_stopwatch_tick_marks(
         self, painter: QPainter, center: QPointF, radius: float, palette: dict
     ) -> None:
         for step in range(60):
-            angle = math.radians(step * 6 - 90)
+            angle_deg = step * 6 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
             outer = QPointF(
-                center.x() + (radius - 10) * math.cos(angle),
-                center.y() + (radius - 10) * math.sin(angle),
+                center.x() + (edge_dist - 10) * math.cos(angle),
+                center.y() + (edge_dist - 10) * math.sin(angle),
             )
 
             if step % 5 == 0:
-                inner_distance = radius - 25
+                inner_distance = edge_dist - 25
                 thickness = 2.4
                 color = _qcolor(palette["major_tick"])
             else:
-                inner_distance = radius - 17
+                inner_distance = edge_dist - 17
                 thickness = 1.2
                 color = _qcolor(palette["minor_tick"])
 
@@ -1889,8 +2217,10 @@ class FloatingAnalogClock(QWidget):
         painter.setPen(_qcolor(palette["text_secondary"]))
         painter.setFont(QFont("Noto Sans", max(7, self.clock_size // 24)))
         for seconds_mark in range(5, 61, 5):
-            angle = math.radians((seconds_mark % 60) * 6 - 90)
-            text_radius = radius - 37
+            angle_deg = (seconds_mark % 60) * 6 - 90
+            angle = math.radians(angle_deg)
+            edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
+            text_radius = edge_dist - 37
             x = center.x() + text_radius * math.cos(angle)
             y = center.y() + text_radius * math.sin(angle)
             painter.drawText(int(x - 8), int(y + 4), "60" if seconds_mark == 60 else str(seconds_mark))
@@ -1898,6 +2228,21 @@ class FloatingAnalogClock(QWidget):
     def _draw_clock_hands(
         self, painter: QPainter, center: QPointF, radius: float, palette: dict
     ) -> None:
+        """Dispatch to hand-style renderer based on theme config."""
+        hand_style = palette.get("hand_style", "default")
+        if hand_style == "mercedes":
+            self._draw_mercedes_hands(painter, center, radius, palette)
+        elif hand_style == "dauphine":
+            self._draw_dauphine_hands(painter, center, radius, palette)
+        elif hand_style == "baton":
+            self._draw_baton_hands(painter, center, radius, palette)
+        else:
+            self._draw_default_hands(painter, center, radius, palette)
+
+    def _draw_default_hands(
+        self, painter: QPainter, center: QPointF, radius: float, palette: dict
+    ) -> None:
+        """Original simple tapered hands."""
         now = datetime.now()
         hour = (now.hour % 12) + now.minute / 60.0 + now.second / 3600.0
         minute = now.minute + now.second / 60.0
@@ -1928,6 +2273,147 @@ class FloatingAnalogClock(QWidget):
                 width=1,
                 color=_qcolor(palette["hand_accent"]),
             )
+
+    def _draw_mercedes_hands(
+        self, painter: QPainter, center: QPointF, radius: float, palette: dict
+    ) -> None:
+        """Rolex-style Mercedes hands (circle near hour hand tip, distinctive shapes)."""
+        now = datetime.now()
+        hour_angle = (now.hour % 12 + now.minute / 60.0 + now.second / 3600.0) * 30 - 90
+        minute_angle = (now.minute + now.second / 60.0) * 6 - 90
+        second_angle = now.second * 6 - 90
+
+        # Hour hand — Mercedes style with circle near tip
+        h_len = radius * 0.48
+        h_width = 5
+        hour_end = QPointF(
+            center.x() + h_len * math.cos(math.radians(hour_angle)),
+            center.y() + h_len * math.sin(math.radians(hour_angle)),
+        )
+        # Shadow
+        painter.setPen(QPen(QColor(0, 0, 0, 70), h_width + 1, cap=Qt.RoundCap))
+        painter.drawLine(center + QPointF(1.5, 1.5), hour_end + QPointF(1.5, 1.5))
+        # Body
+        painter.setPen(QPen(_qcolor(palette["hand_primary"]), h_width, cap=Qt.RoundCap))
+        painter.drawLine(center, hour_end)
+        # Mercedes circle near tip
+        circle_center = QPointF(
+            center.x() + (h_len * 0.82) * math.cos(math.radians(hour_angle)),
+            center.y() + (h_len * 0.82) * math.sin(math.radians(hour_angle)),
+        )
+        painter.setBrush(_qcolor(palette["hand_primary"]))
+        painter.setPen(QPen(_qcolor(palette["face_fill"][0]), 1.0))
+        painter.drawEllipse(circle_center, h_width * 0.9, h_width * 0.9)
+
+        # Minute hand — straight, elegant
+        m_len = radius * 0.70
+        m_width = 3
+        min_end = QPointF(
+            center.x() + m_len * math.cos(math.radians(minute_angle)),
+            center.y() + m_len * math.sin(math.radians(minute_angle)),
+        )
+        painter.setPen(QPen(QColor(0, 0, 0, 70), m_width + 1, cap=Qt.RoundCap))
+        painter.drawLine(center + QPointF(1.5, 1.5), min_end + QPointF(1.5, 1.5))
+        painter.setPen(QPen(_qcolor(palette["hand_secondary"]), m_width, cap=Qt.RoundCap))
+        painter.drawLine(center, min_end)
+
+        # Second hand — thin with counterbalance circle
+        if self.show_seconds:
+            s_len = radius * 0.82
+            s_width = 1.2
+            sec_end = QPointF(
+                center.x() + s_len * math.cos(math.radians(second_angle)),
+                center.y() + s_len * math.sin(math.radians(second_angle)),
+            )
+            sec_tail = QPointF(
+                center.x() - (s_len * 0.15) * math.cos(math.radians(second_angle)),
+                center.y() - (s_len * 0.15) * math.sin(math.radians(second_angle)),
+            )
+            painter.setPen(QPen(_qcolor(palette["hand_accent"]), s_width, cap=Qt.RoundCap))
+            painter.drawLine(sec_tail, sec_end)
+
+    def _draw_dauphine_hands(
+        self, painter: QPainter, center: QPointF, radius: float, palette: dict
+    ) -> None:
+        """Citizen-inspired faceted dauphine hands (pointed, elegant)."""
+        now = datetime.now()
+        hour_angle = (now.hour % 12 + now.minute / 60.0 + now.second / 3600.0) * 30 - 90
+        minute_angle = (now.minute + now.second / 60.0) * 6 - 90
+        second_angle = now.second * 6 - 90
+
+        def _dauphine_tip(angle_deg: float, length: float) -> QPointF:
+            return QPointF(
+                center.x() + length * math.cos(math.radians(angle_deg)),
+                center.y() + length * math.sin(math.radians(angle_deg)),
+            )
+
+        # Hour hand — tapered
+        h_len = radius * 0.46
+        h_base = 4.0
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(_qcolor(palette["hand_primary"]))
+        tip = _dauphine_tip(hour_angle, h_len)
+        tail = _dauphine_tip(hour_angle + 180, h_len * 0.08)
+        perp = math.radians(hour_angle + 90)
+        painter.drawPolygon(
+            tip,
+            QPointF(tail.x() + h_base * math.cos(perp), tail.y() + h_base * math.sin(perp)),
+            QPointF(tail.x() - h_base * math.cos(perp), tail.y() - h_base * math.sin(perp)),
+        )
+
+        # Minute hand — longer, narrower
+        m_len = radius * 0.68
+        m_base = 2.8
+        painter.setBrush(_qcolor(palette["hand_secondary"]))
+        tip = _dauphine_tip(minute_angle, m_len)
+        tail = _dauphine_tip(minute_angle + 180, m_len * 0.08)
+        perp = math.radians(minute_angle + 90)
+        painter.drawPolygon(
+            tip,
+            QPointF(tail.x() + m_base * math.cos(perp), tail.y() + m_base * math.sin(perp)),
+            QPointF(tail.x() - m_base * math.cos(perp), tail.y() - m_base * math.sin(perp)),
+        )
+
+        # Second hand
+        if self.show_seconds:
+            s_len = radius * 0.82
+            s_base = 1.0
+            painter.setBrush(_qcolor(palette["hand_accent"]))
+            tip = _dauphine_tip(second_angle, s_len)
+            tail = _dauphine_tip(second_angle + 180, s_len * 0.12)
+            perp = math.radians(second_angle + 90)
+            painter.drawPolygon(
+                tip,
+                QPointF(tail.x() + s_base * math.cos(perp), tail.y() + s_base * math.sin(perp)),
+                QPointF(tail.x() - s_base * math.cos(perp), tail.y() - s_base * math.sin(perp)),
+            )
+
+    def _draw_baton_hands(
+        self, painter: QPainter, center: QPointF, radius: float, palette: dict
+    ) -> None:
+        """Casio-inspired bold baton hands."""
+        now = datetime.now()
+        hour_angle = (now.hour % 12 + now.minute / 60.0 + now.second / 3600.0) * 30 - 90
+        minute_angle = (now.minute + now.second / 60.0) * 6 - 90
+        second_angle = now.second * 6 - 90
+
+        def _baton(angle_deg: float, length: float, width: float, color: QColor) -> None:
+            end = QPointF(
+                center.x() + length * math.cos(math.radians(angle_deg)),
+                center.y() + length * math.sin(math.radians(angle_deg)),
+            )
+            painter.setPen(QPen(QColor(0, 0, 0, 70), width + 1, cap=Qt.RoundCap))
+            painter.drawLine(center + QPointF(1.5, 1.5), end + QPointF(1.5, 1.5))
+            painter.setPen(QPen(color, width, cap=Qt.RoundCap))
+            painter.drawLine(center, end)
+
+        # Hour
+        _baton(hour_angle, radius * 0.48, 5, _qcolor(palette["hand_primary"]))
+        # Minute
+        _baton(minute_angle, radius * 0.70, 3.5, _qcolor(palette["hand_secondary"]))
+        # Second
+        if self.show_seconds:
+            _baton(second_angle, radius * 0.82, 1.5, _qcolor(palette["hand_accent"]))
 
     def _draw_stopwatch_hands(
         self, painter: QPainter, center: QPointF, radius: float, palette: dict
@@ -2054,6 +2540,20 @@ class FloatingAnalogClock(QWidget):
         }
         return regions
 
+    @staticmethod
+    def _draw_centered_numeral(painter: QPainter, x: float, y: float, text: str, color: QColor) -> None:
+        """Draw numeral text centered precisely at (x, y) using bounding-rect alignment."""
+        painter.setPen(color)
+        metrics = painter.fontMetrics()
+        # horizontalAdvance is available in Qt >= 5.11 (standard PyQt5)
+        try:
+            text_w = metrics.horizontalAdvance(text)
+        except AttributeError:
+            text_w = metrics.width(text)
+        text_h = metrics.height()
+        rect = QRectF(x - text_w / 2.0, y - text_h / 2.0, text_w, text_h)
+        painter.drawText(rect, Qt.AlignCenter, text)
+
     def _draw_day_date(self, painter: QPainter, center: QPointF, radius: float, palette: dict) -> None:
         day_abbr, date_str = self._get_day_date_text()
 
@@ -2083,6 +2583,44 @@ class FloatingAnalogClock(QWidget):
         painter.setPen(_qcolor(palette["text_primary"]))
         date_rect = QRectF(win_rect.left(), win_rect.top() + win_rect.height() * 0.44, win_rect.width(), win_rect.height() * 0.56)
         painter.drawText(date_rect, Qt.AlignCenter, date_str)
+
+    def _draw_brand_text(self, painter: QPainter, center: QPointF, radius: float, palette: dict) -> None:
+        """Renders brand text below the 12 o'clock position."""
+        brand = palette.get("brand_text", "")
+        if not brand:
+            return
+
+        max_w = radius * 0.9
+        font_sz = max(8, radius * 0.09)
+        font = QFont("Noto Sans", int(font_sz), QFont.Bold)
+
+        # Only apply letter spacing to short brands (≤6 chars like ROLEX, IWC, OMEGA)
+        # Long brands (PATEK PHILIPPE, AUDEMARS PIGUET) need tight spacing to fit
+        if len(brand) <= 6:
+            font.setLetterSpacing(QFont.AbsoluteSpacing, max(1.5, radius * 0.012))
+
+        painter.setFont(font)
+
+        # Auto-shrink font if brand text is wider than available space
+        metrics = painter.fontMetrics()
+        try:
+            text_w = metrics.horizontalAdvance(brand)
+        except AttributeError:
+            text_w = metrics.boundingRect(brand).width()
+        if text_w > max_w and font_sz > 6:
+            scale = max_w / text_w
+            font_sz = max(6, int(int(font_sz) * scale))
+            font = QFont("Noto Sans", font_sz, QFont.Bold)
+            painter.setFont(font)
+
+        painter.setPen(_qcolor(palette["text_secondary"]))
+        text_rect = QRectF(
+            center.x() - radius * 0.45,
+            center.y() - radius * 0.65,
+            max_w,
+            radius * 0.14,
+        )
+        painter.drawText(text_rect, Qt.AlignCenter, brand)
 
     def _draw_gear_icon(self, painter: QPainter, center: QPointF, size: float, color: QColor) -> None:
         painter.setPen(QPen(color, 1.5))
@@ -2369,6 +2907,7 @@ def main() -> int:
     raw_layer = _resolve_smart("layer", getattr(args, "layer", None), saved_state.get("layer"), DEFAULT_LAYER)
     raw_theme = _resolve_smart("theme", getattr(args, "theme", None), saved_state.get("theme"), DEFAULT_THEME)
     raw_font = _resolve_smart("readout_font", getattr(args, "readout_font", None), saved_state.get("readout_font"), DEFAULT_READOUT_FONT)
+    raw_shape = _resolve_smart("face_shape", getattr(args, "face_shape", None), saved_state.get("face_shape"), SHAPE_ROUND)
     
     # 2. RESOLVE COMPLEX VALUES
     cli_opacity = getattr(args, "opacity", None)
@@ -2402,6 +2941,7 @@ def main() -> int:
     launch_layer = _valid_layer(raw_layer)
     launch_theme = _valid_theme(raw_theme)
     launch_font = _normalize_readout_font(raw_font)
+    launch_shape = _valid_shape(raw_shape)
     
     initial_stopwatch_running = bool(saved_state.get("stopwatch_running", False))
     initial_stopwatch_elapsed = int(saved_state.get("stopwatch_elapsed", 0))
@@ -2477,6 +3017,7 @@ def main() -> int:
             stopwatch_active=launch_stopwatch,
             color_theme=launch_theme,
             readout_font=launch_font,
+            face_shape=launch_shape,
             initial_x=int(saved_state.get("x", 0)),
             initial_y=int(saved_state.get("y", 0)),
         )
