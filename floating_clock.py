@@ -251,8 +251,8 @@ THEME_PRESETS = {
         "brand_text": "",
         "preferred_mode": None,
     },
-    "rolex": {
-        "label": "Rolex",
+    "vintage_gold": {
+        "label": "Vintage Gold",
         "face_fill": [(26, 80, 26, 240), (18, 55, 18, 255)],
         "face_border": (212, 175, 55, 200),
         "major_tick": (212, 175, 55, 230),
@@ -268,13 +268,13 @@ THEME_PRESETS = {
         "readout_label": (212, 175, 55, 200),
         "readout_text": (255, 215, 0, 250),
         "glass_highlight": (255, 255, 200, 50),
-        "marker_style": "rolex",
-        "hand_style": "mercedes",
-        "brand_text": "ROLEX",
+        "marker_style": "luxury",
+        "hand_style": "lume",
+        "brand_text": "GENEVE",
         "preferred_mode": None,
     },
-    "casio": {
-        "label": "Casio",
+    "digital_retro": {
+        "label": "Digital Retro",
         "face_fill": [(35, 35, 42, 255), (20, 20, 28, 255)],
         "face_border": (100, 110, 130, 200),
         "major_tick": (180, 200, 230, 230),
@@ -290,13 +290,13 @@ THEME_PRESETS = {
         "readout_label": (150, 200, 245, 200),
         "readout_text": (100, 220, 255, 250),
         "glass_highlight": (200, 220, 255, 30),
-        "marker_style": "casio",
+        "marker_style": "digital",
         "hand_style": "baton",
-        "brand_text": "CASIO",
+        "brand_text": "DIGITAL",
         "preferred_mode": "digital",
     },
-    "citizen": {
-        "label": "Citizen",
+    "blue_steel": {
+        "label": "Blue Steel",
         "face_fill": [(22, 42, 72, 240), (14, 28, 55, 255)],
         "face_border": (180, 200, 225, 180),
         "major_tick": (220, 235, 252, 230),
@@ -312,13 +312,13 @@ THEME_PRESETS = {
         "readout_label": (180, 210, 245, 210),
         "readout_text": (220, 240, 255, 250),
         "glass_highlight": (200, 220, 255, 45),
-        "marker_style": "citizen",
+        "marker_style": "slim",
         "hand_style": "dauphine",
-        "brand_text": "CITIZEN",
+        "brand_text": "CHRONOMETER",
         "preferred_mode": None,
     },
-    "omega": {
-        "label": "Omega",
+    "monochrome": {
+        "label": "Monochrome",
         "face_fill": [(28, 28, 32, 240), (15, 15, 18, 255)],
         "face_border": (180, 180, 190, 180),
         "major_tick": (255, 255, 255, 230),
@@ -336,11 +336,11 @@ THEME_PRESETS = {
         "glass_highlight": (255, 255, 255, 40),
         "marker_style": "default",
         "hand_style": "dauphine",
-        "brand_text": "OMEGA",
+        "brand_text": "GENEVE",
         "preferred_mode": None,
     },
-    "tag_heuer": {
-        "label": "Tag Heuer",
+    "racing": {
+        "label": "Racing",
         "face_fill": [(235, 238, 242, 245), (218, 222, 228, 255)],
         "face_border": (60, 60, 70, 180),
         "major_tick": (40, 40, 50, 230),
@@ -356,13 +356,13 @@ THEME_PRESETS = {
         "readout_label": (40, 40, 50, 210),
         "readout_text": (200, 40, 40, 250),
         "glass_highlight": (255, 255, 255, 60),
-        "marker_style": "casio",
+        "marker_style": "digital",
         "hand_style": "baton",
-        "brand_text": "TAG HEUER",
+        "brand_text": "CHRONO",
         "preferred_mode": None,
     },
-    "patek": {
-        "label": "Patek Philippe",
+    "ivory": {
+        "label": "Ivory",
         "face_fill": [(248, 242, 232, 245), (238, 230, 218, 255)],
         "face_border": (180, 160, 130, 180),
         "major_tick": (120, 100, 75, 230),
@@ -380,11 +380,11 @@ THEME_PRESETS = {
         "glass_highlight": (255, 255, 240, 60),
         "marker_style": "default",
         "hand_style": "dauphine",
-        "brand_text": "PATEK PHILIPPE",
+        "brand_text": "GENEVE",
         "preferred_mode": None,
     },
-    "iwc": {
-        "label": "IWC",
+    "pilot": {
+        "label": "Pilot",
         "face_fill": [(18, 20, 24, 248), (10, 12, 15, 255)],
         "face_border": (220, 220, 225, 180),
         "major_tick": (255, 255, 255, 240),
@@ -402,11 +402,11 @@ THEME_PRESETS = {
         "glass_highlight": (255, 255, 255, 30),
         "marker_style": "default",
         "hand_style": "default",
-        "brand_text": "IWC",
+        "brand_text": "PILOT",
         "preferred_mode": None,
     },
-    "breitling": {
-        "label": "Breitling",
+    "aviator": {
+        "label": "Aviator",
         "face_fill": [(18, 35, 60, 245), (12, 24, 45, 255)],
         "face_border": (190, 190, 200, 180),
         "major_tick": (255, 255, 255, 230),
@@ -423,12 +423,12 @@ THEME_PRESETS = {
         "readout_text": (255, 255, 255, 250),
         "glass_highlight": (200, 220, 255, 35),
         "marker_style": "default",
-        "hand_style": "mercedes",
-        "brand_text": "BREITLING",
+        "hand_style": "lume",
+        "brand_text": "AVIATOR",
         "preferred_mode": None,
     },
-    "ap": {
-        "label": "Audemars Piguet",
+    "steel_blue": {
+        "label": "Steel Blue",
         "face_fill": [(80, 88, 98, 245), (55, 62, 72, 255)],
         "face_border": (180, 190, 200, 180),
         "major_tick": (220, 230, 240, 230),
@@ -446,12 +446,24 @@ THEME_PRESETS = {
         "glass_highlight": (200, 220, 255, 40),
         "marker_style": "default",
         "hand_style": "baton",
-        "brand_text": "AUDEMARS PIGUET",
+        "brand_text": "GENEVE",
         "preferred_mode": None,
     },
 }
-THEME_ORDER = ["midnight", "daylight", "high_contrast", "ocean", "rolex", "casio", "citizen", "omega", "tag_heuer", "patek", "iwc", "breitling", "ap"]
+THEME_ORDER = ["midnight", "daylight", "high_contrast", "ocean", "vintage_gold", "digital_retro", "blue_steel", "monochrome", "racing", "ivory", "pilot", "aviator", "steel_blue"]
 DEFAULT_THEME = "midnight"
+
+LEGACY_THEME_ALIASES = {
+    "rolex": "vintage_gold",
+    "casio": "digital_retro",
+    "citizen": "blue_steel",
+    "omega": "monochrome",
+    "tag_heuer": "racing",
+    "patek": "ivory",
+    "iwc": "pilot",
+    "breitling": "aviator",
+    "ap": "steel_blue",
+}
 
 PREFERRED_READOUT_FONTS = [
     "JetBrains Mono",
@@ -492,6 +504,8 @@ def _valid_layer(layer: str | None) -> str:
 def _valid_theme(theme_name: str | None) -> str:
     if theme_name in THEME_PRESETS:
         return theme_name
+    if theme_name in LEGACY_THEME_ALIASES:
+        return LEGACY_THEME_ALIASES[theme_name]
     return DEFAULT_THEME
 
 
@@ -1954,11 +1968,11 @@ class FloatingAnalogClock(QWidget):
     ) -> None:
         """Dispatch to marker-style renderer based on theme config."""
         marker_style = palette.get("marker_style", "default")
-        if marker_style == "rolex":
+        if marker_style in ("rolex", "luxury"):
             self._draw_rolex_markers(painter, center, radius, palette)
-        elif marker_style == "casio":
+        elif marker_style in ("casio", "digital"):
             self._draw_casio_markers(painter, center, radius, palette)
-        elif marker_style == "citizen":
+        elif marker_style in ("citizen", "slim"):
             self._draw_citizen_markers(painter, center, radius, palette)
         else:
             self._draw_default_markers(painter, center, radius, palette)
@@ -2230,7 +2244,7 @@ class FloatingAnalogClock(QWidget):
     ) -> None:
         """Dispatch to hand-style renderer based on theme config."""
         hand_style = palette.get("hand_style", "default")
-        if hand_style == "mercedes":
+        if hand_style in ("mercedes", "lume"):
             self._draw_mercedes_hands(painter, center, radius, palette)
         elif hand_style == "dauphine":
             self._draw_dauphine_hands(painter, center, radius, palette)
