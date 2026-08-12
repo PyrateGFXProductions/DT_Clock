@@ -1,10 +1,19 @@
 # DT Clock 🕰️
 
+**Your desktop deserves a better clock.**
+
 [![Support on Ko-fi](https://img.shields.io/badge/Support-Ko--fi-F16061?style=flat-square&logo=ko-fi&logoColor=white)](https://ko-fi.com/pyrategfxproductions)
+
+<p align="center">
+  <a href="https://www.python.org"><img src="https://img.shields.io/badge/Python-3-3776AB?logo=python&logoColor=white" alt="Python 3"></a>
+  <a href="https://doc.qt.io/qt-6/pyqt5-index.html"><img src="https://img.shields.io/badge/PyQt5-41CD52?logo=qt&logoColor=white" alt="PyQt5"></a>
+  <a href="https://microsoft.com/windows"><img src="https://img.shields.io/badge/Windows-brightgreen" alt="Windows"></a>
+  <a href="https://archlinux.org"><img src="https://img.shields.io/badge/Linux%20(KDE%2FArch)-blue" alt="Linux (KDE/Arch)"></a>
+</p>
 
 **A sleek, customizable, and minimalist floating analog clock for your desktop.**
 
-DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS/Arch/KDE)** and **Windows**. It combines a classic analog aesthetic with modern features like transparency, window layering, a built-in precision stopwatch, and **13 designer watch themes**.
+DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS/Arch/KDE)** and **Windows**. It combines a classic analog aesthetic with modern features like transparency, window layering, a built-in precision stopwatch, and **13 designer watch themes** — so your clock matches your setup, not the other way around.
 
 ![DT Clock Demo](images/demo.gif)
 
