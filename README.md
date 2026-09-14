@@ -87,12 +87,32 @@ The easiest way to use DT Clock on Windows is to download the latest executable 
    python floating_clock.py
    ```
 
-### For Linux Users (Arch/CachyOS)
-1. Install PyQt5:
+### For Linux Users (Arch/CachyOS, Debian/Ubuntu, Fedora)
+1. Install Python 3 and PyQt5:
    ```bash
-   sudo pacman -S python-pyqt5
+   # Arch / CachyOS
+   sudo pacman -S python python-pyqt5
+
+   # Debian / Ubuntu
+   sudo apt install python3 python3-pyqt5
+
+   # Fedora
+   sudo dnf install python3 python3-qt5
    ```
+   (Alternatively on any distro: `pip install PyQt5`.)
 2. Launch the app:
+   ```bash
+   python3 floating_clock.py
+   ```
+
+### For macOS Users
+Prebuilt macOS binaries are not provided — but running from source takes a minute:
+1. Install [Python 3](https://www.python.org/downloads/) (or `brew install python`).
+2. Install dependencies:
+   ```bash
+   pip3 install PyQt5 pyinstaller
+   ```
+3. Launch the app:
    ```bash
    python3 floating_clock.py
    ```
@@ -119,20 +139,21 @@ python3 floating_clock.py --on-bottom # Act as wallpaper/below windows
 
 ## 📦 Releases & Binaries
 
-**Note for Users:** You do not need to install Python or compile code to use DT Clock.
+**Windows (prebuilt):** You do not need Python installed.
 1. Navigate to the **[Releases](https://github.com/PyrateGFXProductions/DT_Clock/releases)** section on GitHub.
-2. Download the latest `DT_Clock.exe` (Windows) or the appropriate Linux binary.
+2. Download the latest `DT Clock.exe`.
 3. Simply run the file to start the clock!
 
-**Note for Developers:** 
-Binaries are excluded from this repository to keep the source control lean. If you wish to build your own binary, use the provided PyInstaller spec file:
+**Linux & macOS (build at your leisure):** No prebuilt binaries are provided — PyInstaller cannot cross-build, so the binary must be built on the OS you want to run it on. It only takes a minute:
+
 ```bash
+pip install PyQt5 pyinstaller   # Linux: use pip, apt/dnf, or pacman (see above)
 pyinstaller "DT Clock.spec" --noconfirm
 ```
-Or manually:
-```bash
-pyinstaller --onefile --windowed --name "DT Clock" --clean floating_clock.py
-```
+
+- The result lands in `dist/` (`DT Clock.exe` on Windows, `DT Clock` ELF binary on Linux, `DT Clock.app`/UNIX executable on macOS).
+- Or run directly from source with `python3 floating_clock.py` — no build needed.
+- Binaries are excluded from git to keep the repo lean; build locally whenever you like.
 
 ---
 
@@ -140,7 +161,16 @@ pyinstaller --onefile --windowed --name "DT Clock" --clean floating_clock.py
 
 If you find DT Clock useful and would like to support its development, consider buying me a coffee! Your support helps keep the project alive and free for everyone.
 
-[![Support on Ko-fi](https://img.shields.io/badge/Ko--fi-Buy%20Me%20a%20Coffee-F16061?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/pyrategfxproductions)
+[![Support me on Ko-fi](https://img.shields.io/badge/Support%20me%20on-Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white)](https://ko-fi.com/pyrategfxproductions)
+
+Check out my other projects
+
+[![YouTube](https://img.shields.io/badge/YouTube-PyrateGFXProductions-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@PyrateGFXProductions)
+[![YouTube](https://img.shields.io/badge/YouTube-TwigandBerries-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@TwigandBerries)
+[![Civitai](https://img.shields.io/badge/Civitai-PyrateGFXProductions-6D28D9?style=for-the-badge&logo=civitai&logoColor=white)](https://civitai.com/user/PyrateGFXProductions)
+
+Your support helps fund new features, pattern research, and keeping the project maintained and free for everyone.
+
 ---
 
 ## 📄 License

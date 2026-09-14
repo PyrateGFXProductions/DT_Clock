@@ -1812,7 +1812,7 @@ class FloatingAnalogClock(QWidget):
 
         # Face shape: pill for digital, rounded_rect for square, circle for round
         if self.mode == MODE_DIGITAL:
-            pill_corner = radius
+            pill_corner = radius * 0.7
             painter.drawRoundedRect(face_bounds, pill_corner, pill_corner)
         elif self.face_shape == SHAPE_SQUARE:
             painter.drawRoundedRect(face_bounds, face_corner_radius, face_corner_radius)
@@ -2471,23 +2471,24 @@ class FloatingAnalogClock(QWidget):
         )
         painter.setPen(QPen(_qcolor(palette["readout_border"]), 1.4))
         painter.setBrush(_qcolor(palette["readout_bg"]))
-        painter.drawRoundedRect(readout_rect, 11, 11)
+        painter.drawRoundedRect(readout_rect, 12, 12)
 
         status_text = "RUNNING" if self.stopwatch_running else "PAUSED"
-        label_rect = QRectF(readout_rect.left(), readout_rect.top() + 4, readout_rect.width(), 16)
+        label_rect = QRectF(readout_rect.left(), readout_rect.top() + 6, readout_rect.width(), 16)
         painter.setPen(_qcolor(palette["readout_label"]))
-        painter.setFont(QFont("Noto Sans", max(7, self.clock_size // 28)))
+        painter.setFont(QFont(self.readout_font_family, max(7, self.clock_size // 28), QFont.DemiBold))
         painter.drawText(label_rect, int(Qt.AlignHCenter | Qt.AlignVCenter), f"STOPWATCH • {status_text}")
 
         elapsed_text = self._format_stopwatch_elapsed(self._current_stopwatch_ms())
         time_rect = QRectF(
             readout_rect.left() + 8,
-            readout_rect.top() + 20,
+            readout_rect.top() + 22,
             readout_rect.width() - 16,
-            max(16.0, readout_rect.height() - 24),
+            max(16.0, readout_rect.height() - 26),
         )
-        time_font = QFont(self.readout_font_family, max(11, self.clock_size // 15))
+        time_font = QFont(self.readout_font_family, max(12, self.clock_size // 14))
         time_font.setStyleHint(QFont.TypeWriter)
+        time_font.setLetterSpacing(QFont.AbsoluteSpacing, 1)
         painter.setPen(_qcolor(palette["readout_text"]))
         painter.setFont(time_font)
         painter.drawText(time_rect, int(Qt.AlignHCenter | Qt.AlignVCenter), elapsed_text)
@@ -2889,30 +2890,9 @@ def main() -> int:
     saved_state = load_saved_state()
     force_cli = getattr(args, "force_cli", False)
 
-    def _resolve_smart(key: str, cli_val: any, state_val: any, default: any) -> any:
-        if force_cli:
-            return cli_val if cli_val is not None else (state_val if state_val is not None else default)
-        
-        # GHOST SIGNATURE (The stock defaults being injected by hidden scripts)
-        GHOST_SIG = {
-            "size": 220,
-            "opacity": 0.45,
-            "mode": "clock",
-            "theme": "high_contrast",
-            "layer": LAYER_BOTTOM,
-            "readout_font": "Noto Color Emoji"
-        }
-        
-        if state_val is not None and cli_val is not None:
-            # If CLI is the GHOST, trust the Saved State
-            if key in GHOST_SIG and cli_val == GHOST_SIG[key]:
-                _log(f"SMART-SUPREME: Blocked Ghost '{key}={cli_val}' (Using State '{state_val}')")
-                return state_val
-            
-            # If CLI is DIFFERENT from ghost, it's a User Override!
-            _log(f"SMART-SUPREME: User override detected '{key}={cli_val}' (Will update state)")
-            return cli_val
-
+    def _resolve_smart(_key: str, cli_val: any, state_val: any, default: any) -> any:
+        # CLI explicitly passed always wins; otherwise saved state; otherwise default.
+        # (Old GHOST_SIG blocklist removed: it silently swallowed legitimate user flags.)
         return cli_val if cli_val is not None else (state_val if state_val is not None else default)
 
     # 1. RESOLVE CORE VALUES (Smart-Supreme applied)
@@ -2987,9 +2967,10 @@ def main() -> int:
         write_desktop_entry(MENU_ENTRY_FILE, launch_command, autostart=False)
     if AUTOSTART_FILE.exists():
         write_desktop_entry(AUTOSTART_FILE, launch_command, autostart=True)
-        
+
     if PYQT_IMPORT_ERROR is not None:
-        print("PyQt5 is required to run the clock UI. Install with: sudo pacman -S python-pyqt5")
+        print("PyQt5 is required to run the clock UI.")
+        print("Install with: pip install PyQt5 (Windows) or sudo pacman -S python-pyqt5 (Arch/CachyOS)")
         return 1
 
     # SINGLE INSTANCE LOCK
@@ -3067,6 +3048,11 @@ def main() -> int:
         _log("Startup sequence complete. 10s initialization lock active.")
 
         return app.exec_()
+    except Exception:
+        import traceback
+        print("!!! Failed to run clock UI - see traceback below.")
+        traceback.print_exc()
+        return 1
     finally:
         # Only remove the lock if we own it.
         if wrote_lock:
