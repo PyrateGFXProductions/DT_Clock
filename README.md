@@ -11,8 +11,6 @@
   <a href="https://archlinux.org"><img src="https://img.shields.io/badge/Linux%20(KDE%2FArch)-blue" alt="Linux (KDE/Arch)"></a>
 </p>
 
-> 🛠️ **Enjoying this free tool?** Check out my production-grade **Logo-to-Animation ComfyUI Engine** → [PGFX AI Logo Studio](https://github.com/PyrateGFXProductions/logo-designer)
-
 **A sleek, customizable, and minimalist floating analog clock for your desktop.**
 
 DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS/Arch/KDE)** and **Windows**. It combines a classic analog aesthetic with modern features like transparency, window layering, a built-in precision stopwatch, and **13 designer watch themes** — so your clock matches your setup, not the other way around.
