@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import functools
 import json
 import math
 import os
@@ -46,11 +47,30 @@ AUTOSTART_FILE = Path.home() / ".config" / "autostart" / f"{APP_ID}.desktop"
 KWIN_RULES_FILE = Path.home() / ".config" / "kwinrulesrc"
 KWIN_RULE_GROUP = "DTClockKeepAbove"
 LOG_FILE = STATE_DIR / "debug.log"
+MAX_LOG_BYTES = 512 * 1024
+
+def _rotate_log_if_needed() -> None:
+    """Rotate the debug log once it exceeds MAX_LOG_BYTES.
+
+    Keeps at most one previous file (debug.log.1); older data is discarded so
+    the log can never grow without bound.
+    """
+    try:
+        if not LOG_FILE.exists():
+            return
+        if LOG_FILE.stat().st_size <= MAX_LOG_BYTES:
+            return
+        backup = LOG_FILE.with_name(LOG_FILE.name + ".1")
+        backup.unlink(missing_ok=True)
+        LOG_FILE.replace(backup)
+    except OSError:
+        pass
 
 def _log(msg: str):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
     try:
         STATE_DIR.mkdir(parents=True, exist_ok=True)
+        _rotate_log_if_needed()
         with open(LOG_FILE, "a", encoding="utf-8") as f:
             f.write(f"[{timestamp}] [PID {os.getpid()}] {msg}\n")
     except Exception:
@@ -465,6 +485,28 @@ LEGACY_THEME_ALIASES = {
     "ap": "steel_blue",
 }
 
+# Dial typefaces: preferred family stacks per theme for analog dial text
+# (numerals, day/date, brand). First family installed on the system wins;
+# stacks end with a generic fallback. An explicit Font-menu choice always
+# overrides these (see _resolve_dial_font).
+_SANS_STACK = ["Noto Sans", "DejaVu Sans", "Segoe UI", "Arial", "Liberation Sans", "sans-serif"]
+_SERIF_STACK = ["Palatino Linotype", "Book Antiqua", "Georgia", "DejaVu Serif", "Liberation Serif", "Times New Roman", "serif"]
+DIAL_FONT_STACKS = {
+    "midnight": _SANS_STACK,
+    "daylight": _SANS_STACK,
+    "high_contrast": _SANS_STACK,
+    "ocean": _SANS_STACK,
+    "vintage_gold": _SERIF_STACK,  # Rolex-style Garamond serif
+    "digital_retro": ["Consolas", "Lucida Console", "DejaVu Sans Mono", "Liberation Mono", "Courier New", "monospace"],
+    "blue_steel": ["Segoe UI", "Helvetica Neue", "Arial", "DejaVu Sans", "Liberation Sans", "sans-serif"],
+    "monochrome": _SERIF_STACK,  # Omega-style refined serif
+    "racing": ["Franklin Gothic Medium", "Arial Narrow", "Arial", "DejaVu Sans", "Liberation Sans", "sans-serif"],
+    "ivory": _SERIF_STACK,  # Patek-style Breguet serif
+    "pilot": ["Arial", "Helvetica", "DejaVu Sans", "Liberation Sans", "sans-serif"],
+    "aviator": _SERIF_STACK,  # Breitling-style serif wordmark
+    "steel_blue": ["Segoe UI", "Verdana", "Arial", "DejaVu Sans", "Liberation Sans", "sans-serif"],
+}
+
 PREFERRED_READOUT_FONTS = [
     "JetBrains Mono",
     "Fira Code",
@@ -478,7 +520,7 @@ DEFAULT_READOUT_FONT = "Monospace"
 
 
 def _clamp_opacity(value: float) -> float:
-    return max(0.05, min(value, 0.95))
+    return max(0.05, min(value, 1.0))
 
 
 def _desktop_escape(value: str) -> str:
@@ -517,6 +559,25 @@ def _valid_size(size: int | str | None) -> int:
     return max(MIN_CLOCK_SIZE, min(MAX_CLOCK_SIZE, parsed))
 
 
+def _safe_int(value: object, default: int = 0) -> int:
+    """int() that survives corrupt state values (e.g. "abc", None) without raising."""
+    try:
+        return int(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return default
+
+
+def _safe_float(value: object, default: float) -> float:
+    """float() that survives corrupt state values without raising."""
+    try:
+        result = float(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return default
+    if result != result or result in (float("inf"), float("-inf")):  # NaN / inf guard
+        return default
+    return result
+
+
 def _valid_shape(shape: str | None) -> str:
     if shape in (SHAPE_ROUND, SHAPE_SQUARE):
         return shape
@@ -538,6 +599,31 @@ def _normalize_readout_font(font_name: str | None) -> str:
         return DEFAULT_READOUT_FONT
     normalized = font_name.strip()
     return normalized if normalized else DEFAULT_READOUT_FONT
+
+
+@functools.lru_cache(maxsize=64)
+def _resolve_dial_font(theme_key: str, readout_font: str) -> str:
+    """Typeface for analog dial text (numerals, day/date, brand, sw numerals).
+
+    An explicit Font-menu choice (anything but the default) always wins, so
+    the menu affects the analog dial. Otherwise the theme's designer stack is
+    used, first family installed on this system.
+    """
+    if readout_font != DEFAULT_READOUT_FONT:
+        return readout_font
+    prefs = DIAL_FONT_STACKS.get(theme_key, ())
+    if prefs:
+        try:
+            # QFontDatabase without a QApplication can crash natively (not
+            # catchable), so never touch it before the app exists.
+            app = QApplication.instance()
+            available = set(QFontDatabase().families()) if app is not None else set()
+        except Exception:
+            available = set()
+        for family in prefs:
+            if family in ("serif", "sans-serif", "monospace") or family in available:
+                return family
+    return readout_font
 
 
 def get_readout_font_choices(max_dynamic_fonts: int = 28) -> list[str]:
@@ -962,7 +1048,6 @@ class FloatingAnalogClock(QWidget):
         initial_y: int = 0,
     ):
         super().__init__()
-        self.fully_initialized = False
         self.clock_size = _valid_size(size)
         self.layer = _valid_layer(layer)
         self.show_seconds = show_seconds
@@ -1070,14 +1155,33 @@ class FloatingAnalogClock(QWidget):
         extra_height = self.readout_height_actual if (self.stopwatch_active and self.mode == MODE_ANALOG) else 0
         extra_width = int(self.clock_size * 0.45) if self.mode == MODE_DIGITAL else 0
         target_size = QRect(self.x(), self.y(), self.clock_size + extra_width, self.clock_size + extra_height)
-        
-        if animated:
-            self.animation.stop()
-            self.animation.setStartValue(self.geometry())
-            self.animation.setEndValue(target_size)
-            self.animation.start()
+
+        # NOTE: the widget carries a fixed size (set below). Animating the
+        # geometry property while min==max clamps every step, so the resize
+        # silently never happens. Release the constraint before animating and
+        # re-apply it when the animation finishes.
+        anim = getattr(self, "animation", None)
+        if animated and anim is not None:
+            try:
+                anim.finished.disconnect()
+            except (TypeError, RuntimeError):
+                pass
+            anim.stop()
+            self.setMinimumSize(0, 0)
+            self.setMaximumSize(16777215, 16777215)  # QWIDGETSIZE_MAX
+            anim.setStartValue(self.geometry())
+            anim.setEndValue(target_size)
+            target_w, target_h = target_size.width(), target_size.height()
+            anim.finished.connect(lambda: self.setFixedSize(target_w, target_h))
+            anim.start()
         else:
-            self.setFixedSize(self.clock_size + extra_width, self.clock_size + extra_height)
+            if anim is not None:
+                try:
+                    anim.finished.disconnect()
+                except (TypeError, RuntimeError):
+                    pass
+                anim.stop()
+            self.setFixedSize(target_size.width(), target_size.height())
         
         # Crucial: Some WMs drop hints when local geometry changes
         # Re-apply flags if fully initialized to "lock" the layering back in
@@ -1093,7 +1197,6 @@ class FloatingAnalogClock(QWidget):
 
     def _handle_timer_timeout(self) -> None:
         """Periodic update called by the refresh timer."""
-        _log("Timer heartbeat")
         if sys.platform == "win32":
             # On Windows, update() can be ignored by DWM for frameless/translucent windows.
             # repaint() forces an immediate synchronous paint event.
@@ -1150,14 +1253,16 @@ class FloatingAnalogClock(QWidget):
         self.update()
         self.repaint()
         if persist:
-            self.save_state()
+            self.save_state(force=True)
 
-    def save_state(self, manual: bool = False) -> None:
+    def save_state(self, manual: bool = False, force: bool = False) -> None:
         # INITIALIZATION SHIELD:
-        # On Wayland/KDE, we must ignore all automatic saves during the first 
-        # few seconds of launch to prevent "birth coordinates" (0,0 or centering)
-        # from overwriting the legitimate saved state.
-        if not manual and not getattr(self, "fully_initialized", False):
+        # On Wayland/KDE, we must ignore automatic *positional* saves during the
+        # first few seconds of launch to prevent "birth coordinates" (0,0 or
+        # centering) from overwriting the legitimate saved state.
+        # Explicit settings changes (theme/mode/size/...) pass force=True so a
+        # user action in the first seconds after launch is never silently lost.
+        if not manual and not force and not getattr(self, "fully_initialized", False):
             return
 
         try:
@@ -1268,7 +1373,7 @@ class FloatingAnalogClock(QWidget):
         self._apply_window_size(animated=True)
         self._update_refresh_timer()
         self.update()
-        self.save_state()
+        self.save_state(force=True)
 
     def set_mode(self, mode: str, persist: bool = True) -> None:
         normalized_mode = _valid_mode(mode)
@@ -1282,7 +1387,7 @@ class FloatingAnalogClock(QWidget):
         self._update_refresh_timer()
         self.update()
         if persist:
-            self.save_state()
+            self.save_state(force=True)
 
     def set_layer(self, layer: str, persist: bool = True, force: bool = False) -> None:
         normalized_layer = _valid_layer(layer)
@@ -1295,8 +1400,8 @@ class FloatingAnalogClock(QWidget):
         cur_x, cur_y = self.x(), self.y()
         if cur_x < 0 or cur_y < 0:
              saved = load_saved_state()
-             cur_x = saved.get("x", 0)
-             cur_y = saved.get("y", 0)
+             cur_x = _safe_int(saved.get("x", 0))
+             cur_y = _safe_int(saved.get("y", 0))
 
         self.layer = normalized_layer
         
@@ -1333,11 +1438,10 @@ class FloatingAnalogClock(QWidget):
 
         if normalized_layer == LAYER_TOP:
             self.raise_()
-            self.activateWindow()
-            
+
         self.update()
         if persist:
-            self.save_state()
+            self.save_state(force=True)
 
     def set_clock_size(self, size: int, persist: bool = True) -> None:
         normalized_size = _valid_size(size)
@@ -1346,7 +1450,6 @@ class FloatingAnalogClock(QWidget):
 
         old_center = self.frameGeometry().center()
         self.clock_size = normalized_size
-        self.readout_height = max(52, self.clock_size // 4)
         self._apply_window_size()
         self.move(
             old_center.x() - self.width() // 2,
@@ -1357,7 +1460,7 @@ class FloatingAnalogClock(QWidget):
         self.update()
         self.repaint()
         if persist:
-            self.save_state()
+            self.save_state(force=True)
 
     def set_color_theme(self, theme_name: str, persist: bool = True) -> None:
         normalized_theme = _valid_theme(theme_name)
@@ -1374,7 +1477,7 @@ class FloatingAnalogClock(QWidget):
         self.update()
         self.repaint()
         if persist:
-            self.save_state()
+            self.save_state(force=True)
 
     def set_readout_font(self, font_family: str, persist: bool = True) -> None:
         normalized = _normalize_readout_font(font_family)
@@ -1384,7 +1487,21 @@ class FloatingAnalogClock(QWidget):
         self.update()
         self.repaint()
         if persist:
-            self.save_state()
+            self.save_state(force=True)
+
+    def set_show_seconds(self, show: bool, persist: bool = True) -> None:
+        normalized = bool(show)
+        if normalized == self.show_seconds:
+            return
+        self.show_seconds = normalized
+        self.update()
+        self.repaint()
+        if persist:
+            self.save_state(force=True)
+
+    def _dial_font_family(self) -> str:
+        """Resolved typeface for analog dial text (see _resolve_dial_font)."""
+        return _resolve_dial_font(_valid_theme(self.color_theme), self.readout_font_family)
 
     def _toggle_kwin_rule(self, action: QAction, checked: bool) -> None:
         if checked:
@@ -1421,7 +1538,7 @@ class FloatingAnalogClock(QWidget):
         self.update()
         self.repaint()
         if persist:
-            self.save_state()
+            self.save_state(force=True)
 
     def _open_settings_menu(self, pos: QPoint) -> None:
         """Unified settings menu from the gear icon — all options in one place."""
@@ -1475,6 +1592,13 @@ class FloatingAnalogClock(QWidget):
         square_action.triggered.connect(lambda _checked=False: self.set_face_shape(SHAPE_SQUARE))
         shape_group.addAction(square_action)
         shape_menu.addAction(square_action)
+
+        # ── Second hand ──
+        seconds_action = QAction("Show second hand", self)
+        seconds_action.setCheckable(True)
+        seconds_action.setChecked(self.show_seconds)
+        seconds_action.triggered.connect(lambda checked: self.set_show_seconds(checked))
+        menu.addAction(seconds_action)
 
         # ── Stopwatch ──
         stopwatch_menu = menu.addMenu("Stopwatch")
@@ -1542,6 +1666,21 @@ class FloatingAnalogClock(QWidget):
             opacity_group.addAction(oa)
             opacity_menu.addAction(oa)
 
+        # ── Font (readouts + analog dial; designer themes bring their own until you pick one) ──
+        font_menu = menu.addMenu("Font")
+        font_group = QActionGroup(font_menu)
+        font_group.setExclusive(True)
+        font_choices = list(self.available_readout_fonts)
+        if self.readout_font_family not in font_choices:
+            font_choices.insert(0, self.readout_font_family)
+        for family in font_choices[:30]:
+            fa = QAction(family, self)
+            fa.setCheckable(True)
+            fa.setChecked(self.readout_font_family == family)
+            fa.triggered.connect(lambda _checked=False, f=family: self.set_readout_font(f))
+            font_group.addAction(fa)
+            font_menu.addAction(fa)
+
         menu.addSeparator()
 
         # ── Save ──
@@ -1563,7 +1702,9 @@ class FloatingAnalogClock(QWidget):
         autostart_action = QAction("Start at login", self)
         autostart_action.setCheckable(True)
         autostart_action.setChecked(self._is_autostart_enabled())
-        autostart_action.triggered.connect(lambda checked: self._set_autostart(checked))
+        autostart_action.triggered.connect(
+            lambda checked, action=autostart_action: self._set_autostart(checked, action)
+        )
         sys_menu.addAction(autostart_action)
 
         if sys.platform != "win32":
@@ -1603,7 +1744,7 @@ class FloatingAnalogClock(QWidget):
 
         menu.addSeparator()
         quit_action = QAction("Quit", self)
-        quit_action.triggered.connect(QApplication.instance().quit)
+        quit_action.triggered.connect(self.quit_app)
         menu.addAction(quit_action)
 
         menu.exec_(pos)
@@ -1633,6 +1774,14 @@ class FloatingAnalogClock(QWidget):
         if self.stopwatch_running:
             self.stopwatch_start_time = time.perf_counter()
         self.update()
+        self.save_state(force=True)
+
+    def quit_app(self) -> None:
+        """Persist current state, then exit."""
+        self.save_state(force=True)
+        app = QApplication.instance()
+        if app is not None:
+            app.quit()
 
     def _toggle_entry(self, action: QAction, checked: bool, path: Path, autostart: bool) -> None:
         # For launchers/autostart, we omit explicit settings flags so the app loads the latest saved state.
@@ -1665,19 +1814,24 @@ class FloatingAnalogClock(QWidget):
                 return False
         return AUTOSTART_FILE.exists()
 
-    def _set_autostart(self, enabled: bool) -> None:
+    def _set_autostart(self, enabled: bool, action: QAction | None = None) -> None:
         if sys.platform == "win32":
-            self._set_autostart_windows(enabled)
+            ok = self._set_autostart_windows(enabled)
         else:
             ok = set_desktop_entry_enabled(
                 AUTOSTART_FILE, enabled,
                 self._runtime_launch_command(include_settings=False), autostart=True
             )
-            if not ok:
-                QMessageBox.warning(self, "Autostart Error",
-                    f"Could not {'enable' if enabled else 'disable'} autostart.")
+        if ok:
+            return
+        if action is not None:
+            action.blockSignals(True)
+            action.setChecked(not enabled)
+            action.blockSignals(False)
+        QMessageBox.warning(self, "Autostart Error",
+            f"Could not {'enable' if enabled else 'disable'} autostart.")
 
-    def _set_autostart_windows(self, enabled: bool) -> None:
+    def _set_autostart_windows(self, enabled: bool) -> bool:
         try:
             import winreg
             key = winreg.OpenKey(winreg.HKEY_CURRENT_USER,
@@ -1687,7 +1841,13 @@ class FloatingAnalogClock(QWidget):
                 if getattr(sys, 'frozen', False):
                     cmd = f'"{sys.executable}"'
                 else:
-                    cmd = f'"{sys.executable}" "{Path(__file__).resolve()}"'
+                    exe = sys.executable
+                    # Prefer the windowless interpreter so login doesn't flash a console.
+                    if Path(exe).name.lower() == "python.exe":
+                        windowless = Path(exe).with_name("pythonw.exe")
+                        if windowless.exists():
+                            exe = str(windowless)
+                    cmd = f'"{exe}" "{Path(__file__).resolve()}"'
                 winreg.SetValueEx(key, "DT Clock", 0, winreg.REG_SZ, cmd)
             else:
                 try:
@@ -1695,9 +1855,10 @@ class FloatingAnalogClock(QWidget):
                 except FileNotFoundError:
                     pass
             winreg.CloseKey(key)
+            return True
         except Exception as e:
-            QMessageBox.warning(self, "Autostart Error",
-                f"Could not {'enable' if enabled else 'disable'} autostart:\n{e}")
+            _log(f"Autostart update failed: {e}")
+            return False
 
     def mousePressEvent(self, event) -> None:  # noqa: N802 (Qt signature)
         if event.button() != Qt.LeftButton:
@@ -1729,17 +1890,12 @@ class FloatingAnalogClock(QWidget):
                 
                 # FORCE HANDOVER: On Wayland, this is the only way to move.
                 window_handle = self.windowHandle()
-                if window_handle is not None:
-                    print(">>> MOUSE: Attempting system move handover...")
-                    if hasattr(window_handle, "startSystemMove"):
-                        if window_handle.startSystemMove():
-                            print(">>> MOUSE: System took over dragging.")
-                            self.drag_offset = None 
-                            self.drag_started = True
-                            event.accept()
-                            return
-                    else:
-                        print(">>> MOUSE: windowHandle has no startSystemMove!")
+                if window_handle is not None and hasattr(window_handle, "startSystemMove"):
+                    if window_handle.startSystemMove():
+                        self.drag_offset = None
+                        self.drag_started = True
+                        event.accept()
+                        return
 
         if self.drag_started and self.drag_offset is not None:
             self.move(event.globalPos() - self.drag_offset)
@@ -2006,7 +2162,7 @@ class FloatingAnalogClock(QWidget):
             painter.setPen(QPen(color, thickness))
             painter.drawLine(inner, outer)
 
-        painter.setFont(QFont("Noto Sans", max(8, self.clock_size // 20)))
+        painter.setFont(QFont(self._dial_font_family(), max(8, self.clock_size // 20)))
         numeral_color = _qcolor(palette["text_primary"])
         for hour in range(1, 13):
             angle_deg = hour * 30 - 90
@@ -2076,13 +2232,13 @@ class FloatingAnalogClock(QWidget):
                 )
 
         # Hour numerals (discreet, modern)
-        painter.setFont(QFont("Noto Sans", max(7, self.clock_size // 22)))
+        painter.setFont(QFont(self._dial_font_family(), max(7, self.clock_size // 22)))
         numeral_color = _qcolor(palette["text_primary"])
         for hour in range(1, 13):
             angle_deg = hour * 30 - 90
             angle = math.radians(angle_deg)
             edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
-            text_radius = edge_dist - 44
+            text_radius = edge_dist - 52
             x = center.x() + text_radius * math.cos(angle)
             y = center.y() + text_radius * math.sin(angle)
             self._draw_centered_numeral(painter, x, y, str(hour), numeral_color)
@@ -2129,7 +2285,7 @@ class FloatingAnalogClock(QWidget):
 
         # Bold numerals — positioned further inward to avoid overlapping ticks
         font_sz = max(9, self.clock_size // 18)
-        painter.setFont(QFont("Noto Sans", font_sz, QFont.Bold))
+        painter.setFont(QFont(self._dial_font_family(), font_sz, QFont.Bold))
         numeral_color = _qcolor(palette["text_primary"])
         for hour in range(1, 13):
             angle_deg = hour * 30 - 90
@@ -2166,12 +2322,12 @@ class FloatingAnalogClock(QWidget):
 
         # Elegant baton markers at each hour
         baton_w = max(2.5, radius * 0.025)
-        baton_h = max(6, radius * 0.08)
+        baton_h = max(5, radius * 0.065)
         for hour in range(1, 13):
             angle_deg = hour * 30 - 90
             angle = math.radians(angle_deg)
             edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
-            marker_r = edge_dist - 29
+            marker_r = edge_dist - 27
             x = center.x() + marker_r * math.cos(angle)
             y = center.y() + marker_r * math.sin(angle)
 
@@ -2187,15 +2343,15 @@ class FloatingAnalogClock(QWidget):
             )
             painter.restore()
 
-        # Numerals (elegant, slightly inside the batons)
+        # Numerals (elegant, inside the batons with breathing room)
         font_sz = max(7, self.clock_size // 22)
-        painter.setFont(QFont("Noto Sans", font_sz, QFont.Light))
+        painter.setFont(QFont(self._dial_font_family(), font_sz, QFont.Light))
         numeral_color = _qcolor(palette["text_primary"])
         for hour in range(1, 13):
             angle_deg = hour * 30 - 90
             angle = math.radians(angle_deg)
             edge_dist = self._sq_edge_dist(radius, angle_deg) if self.face_shape == SHAPE_SQUARE else radius
-            text_radius = edge_dist - 42
+            text_radius = edge_dist - 52
             x = center.x() + text_radius * math.cos(angle)
             y = center.y() + text_radius * math.sin(angle)
             self._draw_centered_numeral(painter, x, y, str(hour), numeral_color)
@@ -2229,7 +2385,7 @@ class FloatingAnalogClock(QWidget):
             painter.drawLine(inner, outer)
 
         painter.setPen(_qcolor(palette["text_secondary"]))
-        painter.setFont(QFont("Noto Sans", max(7, self.clock_size // 24)))
+        painter.setFont(QFont(self._dial_font_family(), max(7, self.clock_size // 24)))
         for seconds_mark in range(5, 61, 5):
             angle_deg = (seconds_mark % 60) * 6 - 90
             angle = math.radians(angle_deg)
@@ -2583,7 +2739,7 @@ class FloatingAnalogClock(QWidget):
         painter.drawRoundedRect(win_rect, 4, 4)
 
         label_font_size = max(8, radius * 0.075)
-        label_font = QFont("Noto Sans", int(label_font_size))
+        label_font = QFont(self._dial_font_family(), int(label_font_size))
         label_font.setBold(True)
         painter.setFont(label_font)
 
@@ -2592,7 +2748,7 @@ class FloatingAnalogClock(QWidget):
         painter.drawText(day_rect, Qt.AlignCenter, day_abbr)
 
         date_font_size = max(10, radius * 0.090)
-        date_font = QFont("Noto Sans", int(date_font_size))
+        date_font = QFont(self._dial_font_family(), int(date_font_size))
         date_font.setBold(True)
         painter.setFont(date_font)
         painter.setPen(_qcolor(palette["text_primary"]))
@@ -2607,7 +2763,7 @@ class FloatingAnalogClock(QWidget):
 
         max_w = radius * 0.9
         font_sz = max(8, radius * 0.09)
-        font = QFont("Noto Sans", int(font_sz), QFont.Bold)
+        font = QFont(self._dial_font_family(), int(font_sz), QFont.Bold)
 
         # Only apply letter spacing to short brands (≤6 chars like ROLEX, IWC, OMEGA)
         # Long brands (PATEK PHILIPPE, AUDEMARS PIGUET) need tight spacing to fit
@@ -2625,13 +2781,13 @@ class FloatingAnalogClock(QWidget):
         if text_w > max_w and font_sz > 6:
             scale = max_w / text_w
             font_sz = max(6, int(int(font_sz) * scale))
-            font = QFont("Noto Sans", font_sz, QFont.Bold)
+            font = QFont(self._dial_font_family(), font_sz, QFont.Bold)
             painter.setFont(font)
 
         painter.setPen(_qcolor(palette["text_secondary"]))
         text_rect = QRectF(
             center.x() - radius * 0.45,
-            center.y() - radius * 0.65,
+            center.y() - radius * 0.62,
             max_w,
             radius * 0.14,
         )
@@ -2735,7 +2891,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--opacity",
         type=float,
-        help="Clock face opacity between 0.05 and 0.95.",
+        help="Clock face opacity between 0.05 and 1.0.",
     )
     parser.add_argument(
         "--hide-seconds",
@@ -2905,7 +3061,7 @@ def main() -> int:
     
     # 2. RESOLVE COMPLEX VALUES
     cli_opacity = getattr(args, "opacity", None)
-    launch_opacity = _resolve_smart("opacity", cli_opacity, saved_state.get("opacity"), 0.45)
+    launch_opacity = _safe_float(_resolve_smart("opacity", cli_opacity, saved_state.get("opacity"), 0.45), 0.45)
     
     # VISIBILITY GUARD: If layer is normal and opacity is too low, boost it for start
     if raw_layer == LAYER_NORMAL and launch_opacity < 0.25:
@@ -2938,7 +3094,7 @@ def main() -> int:
     launch_shape = _valid_shape(raw_shape)
     
     initial_stopwatch_running = bool(saved_state.get("stopwatch_running", False))
-    initial_stopwatch_elapsed = int(saved_state.get("stopwatch_elapsed", 0))
+    initial_stopwatch_elapsed = _safe_int(saved_state.get("stopwatch_elapsed", 0))
 
     # 4. DIAGNOSTICS (VERY IMPORTANT FOR THE USER)
     print(f">>> STARTUP: Merged configuration...")
@@ -2996,7 +3152,19 @@ def main() -> int:
         except OSError:
             _log("LOCK: Failed to write lock file. Continuing without single-instance protection.")
     else:
-        _log("LOCK: Skipping instance lock on Windows for debug.")
+        # Windows single-instance enforcement via QLockFile (stale locks from
+        # dead processes are detected automatically). The lock object must stay
+        # alive for the life of the app, so it is kept in a local that outlives
+        # app.exec_().
+        try:
+            STATE_DIR.mkdir(parents=True, exist_ok=True)
+            from PyQt5.QtCore import QLockFile
+            app_lock = QLockFile(str(STATE_DIR / "app.lock"))
+            if not app_lock.tryLock(100):
+                print("!!! Clock is already running. Exiting.")
+                return 0
+        except Exception as e:
+            _log(f"LOCK: QLockFile unavailable ({e}). Continuing without single-instance protection.")
 
     try:
         app = QApplication([])
@@ -3013,8 +3181,8 @@ def main() -> int:
             color_theme=launch_theme,
             readout_font=launch_font,
             face_shape=launch_shape,
-            initial_x=int(saved_state.get("x", 0)),
-            initial_y=int(saved_state.get("y", 0)),
+            initial_x=_safe_int(saved_state.get("x", 0)),
+            initial_y=_safe_int(saved_state.get("y", 0)),
         )
     
         _log("Clock instance created with initial geometry.")
@@ -3033,6 +3201,16 @@ def main() -> int:
         def delayed_restore():
             # Wayland ignores the first few move() attempts while surface maps.
             # We hit it with a sequence of increasing delays.
+            # Guard: if the user has already dragged the window elsewhere since
+            # launch, do NOT yank it back to the saved position.
+            if sys.platform == "win32" or os.environ.get("XDG_SESSION_TYPE") != "wayland":
+                try:
+                    sx = saved_state.get("x")
+                    sy = saved_state.get("y")
+                    if sx is not None and sy is not None and (clock.x(), clock.y()) != (int(sx), int(sy)):
+                        return
+                except (TypeError, ValueError):
+                    pass
             clock.restore_position(getattr(args, "x", None), getattr(args, "y", None), saved_state)
             # Final layering re-assertion via system rules
             if _is_kde_session() and is_kwin_rule_enabled():
@@ -3065,3 +3243,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+

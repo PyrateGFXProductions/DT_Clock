@@ -30,9 +30,9 @@ DT Clock is a highly versatile desktop widget designed for both **Linux (CachyOS
   - Show/hide toggle, start/stop/reset controls.
   - High-precision millisecond digital readout.
   - Custom font selection for the digital display.
-- **🎨 13 Themes (6 Classic + 7 Luxury-Inspired):**
+- **🎨 13 Themes (4 Classic + 9 Luxury-Inspired):**
   - **Classic:** Midnight, Daylight, High Contrast, Ocean
-  - **Luxury-inspired:** Vintage Gold, Digital Retro, Blue Steel, Monochrome, Racing, Pilot, Aviator, Steel Blue
+  - **Luxury-inspired:** Vintage Gold, Digital Retro, Blue Steel, Monochrome, Racing, Ivory, Pilot, Aviator, Steel Blue
   - Each luxury theme features authentic dial colors, signature hand styles (Lume, Dauphine, Baton), and classic watchmaker text.
   - Brand-inspired names auto-size to prevent clipping on long names like "STEEL BLUE".
 - **🎯 Numeral Alignment:** Hour numerals are precisely centered using bounding-rect measurement — no more "12" being off-center.
@@ -61,10 +61,12 @@ Everything is accessible from the **gear icon** on the clock face — there is n
 | **Theme** | Midnight, Daylight, High Contrast, Ocean, Vintage Gold, Digital Retro, Blue Steel, Monochrome, Racing, Ivory, Pilot, Aviator, Steel Blue |
 | **Mode** | Analog, Digital |
 | **Shape** | Round, Square (tick marks & numerals follow the perimeter) |
+| **Show second hand** | Toggle for the analog second hand |
 | **Stopwatch** | Show/Hide, Start/Stop, Reset |
 | **Size** | Smaller (−20), Larger (+20), presets: Small (160), Medium (220), Large (300), XL (380) |
 | **Layer** | Always on top, Normal, Below windows |
 | **Opacity** | Ghost (15%), Translucent (40%), Modern (65%), Bold (85%), Opaque (100%) |
+| **Font** | Typeface picker — drives digital/stopwatch readouts and the analog dial (designer themes bring brand-evocative dial typefaces until you pick one) |
 | **Save** | Save Current Layout |
 | **System** | Center on screen, Start at login (cross-platform), Show in apps menu (Linux), KWin helper (KDE/Linux) |
 | **Quit** | Exit the application |
